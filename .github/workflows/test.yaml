@@ -6,6 +6,7 @@ env:
   LANGCHAIN_HUB_API_KEY: ${{ secrets.LANGCHAIN_HUB_API_KEY }}
   LANGSMITH_PROJECT_ID: ${{ secrets.LANGSMITH_PROJECT_ID }}
   LANGCHAIN_ENDPOINT: "https://api.smith.langchain.com"
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
 jobs:
   test:
