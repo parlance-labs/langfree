@@ -11,6 +11,7 @@ from datetime import date, timedelta, datetime
 from itertools import islice
 from typing import List, Iterable
 from pprint import pformat
+from contextlib import contextmanager
 
 import pandas as pd
 from langchain.load import load
@@ -19,23 +20,43 @@ from langsmith import Client
 from fastcore.foundation import L, first
 
 # %% ../nbs/01_runs.ipynb 3
+@contextmanager
+def _temp_env_var(vars_dict):
+    "Temporarily set environment variables (for testing)"
+    original_values = {name: os.environ.get(name) for name in vars_dict.keys()}
+    
+    # Set temporary values
+    for name, value in vars_dict.items():
+        os.environ[name] = value
+        
+    try:
+        yield
+    finally:
+        # Revert changes after block execution
+        for name, original_value in original_values.items():
+            if original_value is None:
+                del os.environ[name]
+            else:
+                os.environ[name] = original_value
+
+# %% ../nbs/01_runs.ipynb 4
 def check_api_key(nm="LANGCHAIN_HUB_API_KEY"):
     val = os.getenv(nm)
     if not val: raise Exception(f"You must set the environment variable {nm}")
     return val
 
-# %% ../nbs/01_runs.ipynb 4
+# %% ../nbs/01_runs.ipynb 5
 check_api_key("LANGCHAIN_API_KEY")
 check_api_key("LANGCHAIN_ENDPOINT")
 check_api_key("LANGSMITH_PROJECT_ID")
 client = Client()
 
-# %% ../nbs/01_runs.ipynb 6
+# %% ../nbs/01_runs.ipynb 7
 def take(l:Iterable, n:int):
     "Take first n entries from a generator"
     return L(islice(l, n))
 
-# %% ../nbs/01_runs.ipynb 7
+# %% ../nbs/01_runs.ipynb 8
 def get_runs(commit_id:str=None, # The commit ID to filter by 
              proj_id:str=None, # Langsmith Project ID
              only_success=True, # Only include runs that are successfull
@@ -68,12 +89,12 @@ def get_runs(commit_id:str=None, # The commit ID to filter by
     )
     return runs
 
-# %% ../nbs/01_runs.ipynb 11
+# %% ../nbs/01_runs.ipynb 12
 def get_last_child(runs: List[langsmith.schemas.Run]):
     "Get the child runs for a list of runs."
     return [client.read_run(r.child_run_ids[-1]) for r in runs if r.child_run_ids]
 
-# %% ../nbs/01_runs.ipynb 14
+# %% ../nbs/01_runs.ipynb 15
 def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2):
     "Get recent runs from Langsmith.  If `start_dt` is None gets the `last_n_days`."
     if start_dt is None:
@@ -98,7 +119,7 @@ def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2):
                     end_dt=end_dt_obj.strftime('%m/%d/%Y'))
     return runs
 
-# %% ../nbs/01_runs.ipynb 17
+# %% ../nbs/01_runs.ipynb 18
 def get_recent_commit_tags(start_dt=None, end_dt=None, last_n_days=2, return_df=False):
     "Print a table of recent commit SHAs from Langsmith along with their counts that you can filter on"
     runs = L(get_recent_runs(start_dt=start_dt, end_dt=end_dt, last_n_days=last_n_days))
@@ -119,9 +140,14 @@ def get_recent_commit_tags(start_dt=None, end_dt=None, last_n_days=2, return_df=
         print(f'No commits found for {start_dt} - {end_dt}')
         return None
 
-# %% ../nbs/01_runs.ipynb 23
+# %% ../nbs/01_runs.ipynb 24
+def _ischatopenai(run): 
+    if run.name != 'ChatOpenAI':
+        raise TypeError(f'Run: {run.id} is of type `{run.name}`, but can only parse `ChatOpenAI` runs.')
+
 def get_input(run:langsmith.schemas.Run):
-    "Get flattened, human-readable input from a child run.  Assumes that the `inputs` has a `messages` key."
+    "Get flattened, human-readable input from a ChatOpenAI run."
+    _ischatopenai(run)
     inp = ''
     for m in  L(run.inputs['messages']):
         actor = m['id'][-1]
@@ -131,12 +157,12 @@ def get_input(run:langsmith.schemas.Run):
         inp += f'## Source: {actor}\n\n {content}\n\n'
     return inp
 
-# %% ../nbs/01_runs.ipynb 26
+# %% ../nbs/01_runs.ipynb 29
 def get_output(run:langsmith.schemas.Run):
     "Get flattened output from a child run"
     return run.outputs['generations'][0]['text']
 
-# %% ../nbs/01_runs.ipynb 28
+# %% ../nbs/01_runs.ipynb 32
 def get_params(run:langsmith.schemas.Run) -> dict:
     "Get parameters from a run logged in LangSmith"
     if 'invocation_params' in run.extra:
@@ -150,15 +176,15 @@ def get_params(run:langsmith.schemas.Run) -> dict:
                    )
     else: return {}    
 
-# %% ../nbs/01_runs.ipynb 30
+# %% ../nbs/01_runs.ipynb 34
 def get_functions(run:langsmith.schemas.Run) -> List[dict]:
     "Get function definitions from a LangSmith run."
     if 'invocation_params' in run.extra:
         p = run.extra['invocation_params']
-        return p.get('functions')
+        return p.get('functions', [])
     else: return []
 
-# %% ../nbs/01_runs.ipynb 32
+# %% ../nbs/01_runs.ipynb 37
 def get_feedback(run:langsmith.schemas.Run) -> list:
     "Get feedback from a run if exists."
     raw = L(client.list_feedback(run_ids=[run.id]))

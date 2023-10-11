@@ -11,6 +11,7 @@ from typing import List, Callable
 from random import shuffle
 from collections import defaultdict
 
+from .runs import _temp_env_var, Client, _ischatopenai
 from pydantic import BaseModel
 from langchain.adapters import openai as adapt
 from langchain.load import load
@@ -21,13 +22,14 @@ from tenacity import (
     wait_random_exponential,
 )  # for exponential backoff
 
-# %% ../nbs/02_transform.ipynb 3
+
+# %% ../nbs/02_transform.ipynb 4
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def chat(**kwargs):
     "A wrapper around `openai.ChatCompletion` that has automatic retries." 
     return openai.ChatCompletion.create(**kwargs)
 
-# %% ../nbs/02_transform.ipynb 4
+# %% ../nbs/02_transform.ipynb 5
 def rephrase(sentence, max_tokens=100, temperature=0.95):
     "Rephrase a sentence. Useful for data augmentation for finetuning."
     openai.api_key = os.environ['OPENAI_API_KEY']
@@ -42,7 +44,7 @@ def rephrase(sentence, max_tokens=100, temperature=0.95):
     )
     return response.choices[0]['message']['content'].strip()
 
-# %% ../nbs/02_transform.ipynb 6
+# %% ../nbs/02_transform.ipynb 7
 def _gen_name():
     "Generate a random name"
     openai.api_key = os.environ['OPENAI_API_KEY']
@@ -58,26 +60,29 @@ def _gen_name():
     return response.choices[0]['message']['content'].strip().replace('.', '')
 
 def gen_name():
-    "Generate a random name"
+    "Generate a random name, usefule for data augmentation and privacy."
     while True:
         nm = _gen_name()
         if len(nm) <= 18:
             return nm
 
-# %% ../nbs/02_transform.ipynb 8
+# %% ../nbs/02_transform.ipynb 9
 def fetch_run_componets(run_id:str):
-    "Return the `inputs`, `output` and `funcs` for a run."
+    "Return the `inputs`, `output` and `funcs` for a run of type `ChatOpenAI`."
     client = langsmith.Client()
     run = client.read_run(run_id)
+    _ischatopenai(run)
     output = adapt.convert_message_to_dict(load(run.outputs['generations'][0]['message']))
     inputs = [adapt.convert_message_to_dict(load(m)) for m in run.inputs['messages']]
+    params = run.extra['invocation_params']
+    
     for inp in inputs:
         if 'function_call' in inp and inp.get('content', None) is None:
             del inp['content']
-    funcs = run.extra['invocation_params']["functions"]
+    funcs = params.get("functions", [])
     return inputs, output, funcs
 
-# %% ../nbs/02_transform.ipynb 10
+# %% ../nbs/02_transform.ipynb 13
 class RunData(BaseModel):
     "Key components of a run from LangSmith"
     inputs:List[dict]
@@ -85,7 +90,13 @@ class RunData(BaseModel):
     funcs:List[dict] 
     run_id:str
 
-# %% ../nbs/02_transform.ipynb 11
+    @classmethod
+    def from_run_id(cls, run_id:str):
+        "Create a `RunData` object from a run id."
+        inputs, output, funcs = fetch_run_componets(run_id)
+        return cls(inputs=inputs, output=output, funcs=funcs, run_id=run_id)
+
+# %% ../nbs/02_transform.ipynb 17
 def _collate(cbdata:RunData, 
              callback:callable=None) -> dict:
     "Allow a callback to mutate `inputs`, `output`, and `funcs` and construct a dataset for fine tuning."
@@ -94,14 +105,14 @@ def _collate(cbdata:RunData,
     return {"functions": cbdata.funcs,
             "messages": msgs}
 
-# %% ../nbs/02_transform.ipynb 12
+# %% ../nbs/02_transform.ipynb 18
 def collate(run_id:str, callback:Callable[[RunData], RunData]=None) -> dict:
     "Allow a callback to mutate a run for fine tuning."
     i,o,f = fetch_run_componets(run_id)
     cbdata = RunData(inputs=i, output=o, funcs=f, run_id=run_id)
     return _collate(cbdata, callback)
 
-# %% ../nbs/02_transform.ipynb 15
+# %% ../nbs/02_transform.ipynb 22
 def _sub_name_in_func(funcs, name):
     "Substitute 'Unit Test' for `name` in the `email-campaign-creator` function"
     emailfunc = L(funcs).filter(lambda x: x['name'] == 'email-campaign-creator')
@@ -112,13 +123,13 @@ def _sub_name_in_func(funcs, name):
         func['parameters']['properties']['body']['description'] = new_desc
     return funcs
 
-# %% ../nbs/02_transform.ipynb 17
+# %% ../nbs/02_transform.ipynb 24
 def _sub_name_in_output(output, name):
     "Subtitute `[Your Name]` with `name` in the output."
     output['content'] = output['content'].replace('[Your Name]', name)
     return output
 
-# %% ../nbs/02_transform.ipynb 19
+# %% ../nbs/02_transform.ipynb 26
 def _reword_input(inputs):
     "Rephrase the first human input."
     copy_inputs = copy.deepcopy(inputs)
@@ -129,7 +140,7 @@ def _reword_input(inputs):
             break
     return copy_inputs
 
-# %% ../nbs/02_transform.ipynb 21
+# %% ../nbs/02_transform.ipynb 28
 def tsfm_nm_rephrase(rundata:RunData, 
                      name=None) -> RunData:
     "An callback to be used with `collate` that substitutes names and rephrases the language model input."
@@ -141,7 +152,7 @@ def tsfm_nm_rephrase(rundata:RunData,
     tsfm_rundata = RunData(inputs=inputs, output=output, funcs=funcs, run_id=rundata.run_id)
     return tsfm_rundata
 
-# %% ../nbs/02_transform.ipynb 25
+# %% ../nbs/02_transform.ipynb 33
 def write_to_jsonl(data_list:List[dict], filename:str):
     """
     Writes a list of dictionaries to a .jsonl file.
@@ -156,7 +167,7 @@ def write_to_jsonl(data_list:List[dict], filename:str):
             json_str = json.dumps(entry)
             f.write(f"{json_str}\n")
 
-# %% ../nbs/02_transform.ipynb 28
+# %% ../nbs/02_transform.ipynb 36
 def validate_jsonl(fname):
     "Code is modified from https://cookbook.openai.com/examples/chat_finetuning_data_prep, but updated for function calling."
     # Load the dataset

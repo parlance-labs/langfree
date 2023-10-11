@@ -5,3 +5,6 @@ website:
       - 01_runs.ipynb
       - 02_transform.ipynb
       - 03_experimental.ipynb
+      - section: shiny
+        contents:
+          - shiny/index.qmd
