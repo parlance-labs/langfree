@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "langfree"
+  site-url: "https://parlance-labs.github.io/langfree"
+  description: "Utilities to help you work with your language model data outside LangSmith"
+  repo-branch: main
+  repo-url: "https://github.com/parlance-labs/langfree"

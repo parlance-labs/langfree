@@ -1,0 +1,13 @@
+name: CI
+on:  [workflow_dispatch, pull_request, push]
+
+env:
+  LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+  LANGCHAIN_HUB_API_KEY: ${{ secrets.LANGCHAIN_HUB_API_KEY }}
+  LANGSMITH_PROJECT_ID: ${{ secrets.LANGSMITH_PROJECT_ID }}
+  LANGCHAIN_ENDPOINT: "https://api.smith.langchain.com"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps: [uses: fastai/workflows/nbdev-ci@master]
