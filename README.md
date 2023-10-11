@@ -26,7 +26,7 @@ Coming soon
 
 ## Documentation
 
-There is a [docs site here](https://parlance-labs.github.io/langfree/).
+See the [docs site](https://parlance-labs.github.io/langfree/).
 
 ## Contributing
 
