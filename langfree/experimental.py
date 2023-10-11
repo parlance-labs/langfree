@@ -20,6 +20,7 @@ from .runs import (get_runs, get_output, get_input,
 
 # %% ../nbs/03_experimental.ipynb 3
 class LLMRecord(BaseModel):
+    "A parsed run from LangSmith."
     child_run_id:str
     parent_run_id:str
     llm_input:str
