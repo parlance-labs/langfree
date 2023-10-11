@@ -6,10 +6,13 @@
 [![Deploy to GitHub
 Pages](https://github.com/parlance-labs/langfree/actions/workflows/deploy.yaml/badge.svg)](https://github.com/parlance-labs/langfree/actions/workflows/deploy.yaml)
 
-This library is specifically tested against OpenAI and LangSmith. Many
-utitlies are centered around extracting data from the terminal
+Utilities that help you extract, transform and curate
 [ChatOpenAI](https://api.python.langchain.com/en/latest/chat_models/langchain.chat_models.openai.ChatOpenAI.html)
-runs in LangChains. This library is experimental and may change.
+runs from [LangSmith](https://www.langchain.com/langsmith). The goal is
+to facilitate using data from these runs you for fine-tuning your own
+conversational models.
+
+This library is experimental and may change.
 
 ## Install
 
