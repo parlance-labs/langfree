@@ -4,6 +4,13 @@ permissions:
   contents: write
   pages: write
 
+env:
+  LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+  LANGCHAIN_HUB_API_KEY: ${{ secrets.LANGCHAIN_HUB_API_KEY }}
+  LANGSMITH_PROJECT_ID: ${{ secrets.LANGSMITH_PROJECT_ID }}
+  LANGCHAIN_ENDPOINT: "https://api.smith.langchain.com"
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
 on:
   push:
     branches: [ "main", "master" ]
