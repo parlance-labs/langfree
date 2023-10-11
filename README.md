@@ -9,7 +9,7 @@ Pages](https://github.com/parlance-labs/langfree/actions/workflows/deploy.yaml/b
 Utilities that help you extract, transform and curate
 [ChatOpenAI](https://api.python.langchain.com/en/latest/chat_models/langchain.chat_models.openai.ChatOpenAI.html)
 runs from [LangSmith](https://www.langchain.com/langsmith). The goal is
-to facilitate using data from these runs you for fine-tuning your own
+to facilitate using data from these runs for fine-tuning your own
 conversational models.
 
 This library is experimental and may change.
