@@ -3,8 +3,10 @@ on:  [workflow_dispatch, pull_request, push]
 
 env:
   LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+  LANGCHAIN_API_KEY_PUB: ${{ secrets.LANGCHAIN_API_KEY_PUB }}
   LANGCHAIN_HUB_API_KEY: ${{ secrets.LANGCHAIN_HUB_API_KEY }}
   LANGSMITH_PROJECT_ID: ${{ secrets.LANGSMITH_PROJECT_ID }}
+  LANGCHAIN_PROJECT_ID_PUB: ${{ secrets.LANGCHAIN_PROJECT_ID_PUB }}
   LANGCHAIN_ENDPOINT: "https://api.smith.langchain.com"
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
