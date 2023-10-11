@@ -24,6 +24,7 @@ from tenacity import (
 # %% ../nbs/02_transform.ipynb 3
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def chat(**kwargs):
+    "A wrapper around `openai.ChatCompletion` that has automatic retries." 
     return openai.ChatCompletion.create(**kwargs)
 
 # %% ../nbs/02_transform.ipynb 4
