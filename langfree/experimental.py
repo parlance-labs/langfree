@@ -14,7 +14,7 @@ from pydantic import BaseModel
 import langsmith
 from fastcore.foundation import first, L
 from fastcore.test import test_eq
-from .runs import (get_runs_by_commit, get_output, get_input, 
+from .runs import (get_runs_by_commit, 
                            get_params, get_functions,
                           get_feedback, take)
 from .transform import RunData
@@ -24,9 +24,10 @@ from langsmith import Client
 class ChatRecord(BaseModel):
     "A parsed run from LangSmith, focused on the `ChatOpenAI` run type."
     child_run_id:str
-    parent_run_id:str
     child_run:RunData
-    url: str
+    child_url:Union[str,None] = None
+    parent_run_id:Union[str,None] = None
+    parent_url: Union[str,None] = None
     total_tokens:Union[int, None]
     prompt_tokens:Union[int, None]
     completion_tokens:Union[int, None]
@@ -34,8 +35,6 @@ class ChatRecord(BaseModel):
     feedback_keys: Union[List,None] = None
     tags: Union[List,None] = []
     start_dt: Union[str, None] = None
-    parent_url: Union[str,None] = None
-    parent_id: Union[str,None] = None
     function_defs: Union[List,None] = None
     param_model_name: Union[str,None]= None
     param_n: Union[int, None] = None
@@ -77,17 +76,14 @@ class ChatRecord(BaseModel):
             crun = [c for c in _cruns if c.name == 'ChatOpenAI'][-1]
     
         if crun:
-            _input, _output = get_input(crun), get_output(crun)      
-            if 'Agent stopped due to max iterations' in _input: warnings.append('Max Iterations')
-            if _output.strip() == '': warnings.append('No Output')
-            
             params = get_params(crun)
             _feedback = get_feedback(run) # you must get feedback from the root
             
             return cls(child_run_id=str(crun.id),
-                       parent_run_id=str(run.id),
                        child_run=RunData.from_run_id(str(crun.id)),
-                       url=crun.url,
+                       child_url=crun.url,
+                       parent_run_id=str(run.id) if run else None,
+                       parent_url=run.url if run else None,
                        total_tokens=crun.total_tokens,
                        prompt_tokens=crun.prompt_tokens,
                        completion_tokens=crun.completion_tokens,
@@ -95,8 +91,6 @@ class ChatRecord(BaseModel):
                        feedback_keys=list(L(_feedback).attrgot('key').filter()),
                        tags=run.tags,
                        start_dt=run.start_time.strftime('%m/%d/%Y'),
-                       parent_url=run.url if run else None,
-                       parent_id=str(run.id) if run else None,
                        function_defs=get_functions(crun),
                        warnings=warnings,
                        **params)
@@ -107,19 +101,32 @@ class ChatRecordSet(BaseModel):
     records: List[ChatRecord]
     
     @classmethod
-    def from_commit(cls, commit_id:str):
+    def from_commit(cls, commit_id:str, limit:int=None):
         "Create a `LLMDataset` from a commit id"
         _runs = get_runs_by_commit(commit_id=commit_id)
+        if limit: 
+            _runs=take(_runs, limit)
         return cls.from_runs(_runs)
     
     @classmethod
     def from_runs(cls, runs:List[langsmith.schemas.Run]):
         "Load LLMDataset from runs."
-        _records=[ChatRecord.from_run(r) for r in runs]
-        records=[r for r in _records if _records]
-        return cls(records=records)
+        _records=L([ChatRecord.from_run(r) for r in runs]).filter()
+        return cls(records=list(_records))
+
+    @classmethod
+    def from_run_ids(cls, runs:List[str]):
+        "Load LLMDataset from run ids."
+        _records=L([ChatRecord.from_run_id(r) for r in runs]).filter()
+        return cls(records=list(_records))
     
     def __len__(self): return len(self.records)
+
+    def __getitem__(self, index: int) -> ChatRecord:
+        return self.records[index]
+
+    def __repr__(self):
+        return f'`List[ChatRecord]` of size {len(self.records)}.'
     
     def save(self, path:str):
         "Save data to disk."
