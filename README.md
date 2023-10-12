@@ -30,9 +30,6 @@ See the [docs site](https://parlance-labs.github.io/langfree/).
 
 ## Contributing
 
-This library was created with [nbdev](https://nbdev.fast.ai/). PRs will
-need to add appropriate docs, tests and code in notebooks using nbdev.
-If you are not familiar with nbdev, please consider opening an issue.
-See
+This library was created with [nbdev](https://nbdev.fast.ai/). See
 [Contributing.md](https://github.com/parlance-labs/langfree/blob/main/CONTRIBUTING.md)
 for further guidelines.
