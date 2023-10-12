@@ -146,10 +146,5 @@ class ChatRecordSet(BaseModel):
                 
     def to_pandas(self):
         "Convert the `LLMDataset` to a pandas.DataFrame."
-        records = L(self.records).map(lambda x: dict(
-                                                     flat_input=x.flat_input,
-                                                     flat_output=x.flat_output,
-                                                     **dict(x)
-                                                    )
-                                     )                           
+        records = L(self.records).map(dict)                      
         return pd.DataFrame(records)
