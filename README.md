@@ -12,7 +12,7 @@ runs from [LangSmith](https://www.langchain.com/langsmith). The goal is
 to facilitate using data from these runs for fine-tuning your own
 conversational models.
 
-This library is experimental and may change.
+![](langfree.png)
 
 ## Install
 

@@ -14,22 +14,24 @@ from pydantic import BaseModel
 import langsmith
 from fastcore.foundation import first, L
 from fastcore.test import test_eq
-from .runs import (get_runs, get_output, get_input, 
+from .runs import (get_runs_by_commit, get_output, get_input, 
                            get_params, get_functions,
-                          get_feedback, client, take)
+                          get_feedback, take)
+from .transform import RunData
+from langsmith import Client
 
 # %% ../nbs/03_experimental.ipynb 3
 class LLMRecord(BaseModel):
     "A parsed run from LangSmith, focused on the `ChatOpenAI` run type."
     child_run_id:str
     parent_run_id:str
+    child_run:RunData
     llm_input:str
     llm_output: str
     url: str
     total_tokens:Union[int, None]
     prompt_tokens:Union[int, None]
     completion_tokens:Union[int, None]
-    human_readable:bool=False
     feedback: Union[List,None] = None
     feedback_keys: Union[List,None] = None
     tags: Union[List,None] = []
@@ -43,41 +45,41 @@ class LLMRecord(BaseModel):
     param_temp: Union[int, None] = None
     param_presence_penalty: Union[int, None] = None
     param_freq_penalty: Union[int, None] = None
-    error_categories: List[str] = []
+    warnings: List[str] = []
     
     @classmethod
-    def collate(cls, run:langsmith.schemas.Run, human_readable=False):
+    def collate(cls, run:langsmith.schemas.Run):
         "Collate information About A Run into a `LLMRecord`."
-        error_categories = []
+        client = Client()
+        warnings = []
         if run.execution_order != 1: # this is a child run, get the parent
-            crun = run
             run = client.read_run(run.parent_run_id)
             
         _cruns = client.read_run(run_id=run.id, load_child_runs=True).child_runs
-        crun = _cruns[-1] if _cruns else None
-
+        crun = None
+        if _cruns:
+            if _cruns[-1].name != 'ChatOpenAI': 
+                warnings.append('Last Step Not ChatOpenAI')
+            crun = [c for c in _cruns if c.name == 'ChatOpenAI'][-1]
     
         if crun:
-            if crun.name != 'ChatOpenAI': 
-                error_categories.append('Last Step Not ChatOpenAI')
-                _input, _output = '', ''
-            else: _input, _output = get_input(crun), get_output(crun)
+            _input, _output = get_input(crun), get_output(crun)
                 
-            if 'Agent stopped due to max iterations' in _input: error_categories.append('Max Iterations')
-            if _output.strip() == '': error_categories.append('No Output')
+            if 'Agent stopped due to max iterations' in _input: warnings.append('Max Iterations')
+            if _output.strip() == '': warnings.append('No Output')
             
             params = get_params(crun)
             _feedback = get_feedback(run) # you must get feedback from the root
             
             return cls(child_run_id=str(crun.id),
                        parent_run_id=str(run.id),
+                       child_run=RunData.from_run_id(str(crun.id)),
                        llm_input=_input,
                        llm_output=_output,
                        url=crun.url,
                        total_tokens=crun.total_tokens,
                        prompt_tokens=crun.prompt_tokens,
                        completion_tokens=crun.completion_tokens,
-                       human_readable=human_readable,
                        feedback=_feedback, 
                        feedback_keys=list(L(_feedback).attrgot('key').filter()),
                        tags=run.tags,
@@ -85,51 +87,8 @@ class LLMRecord(BaseModel):
                        parent_url=run.url if run else None,
                        parent_id=str(run.id) if run else None,
                        function_defs=get_functions(crun),
-                       error_categories=error_categories,
+                       warnings=warnings,
                        **params)
-        
-    def _repr_markdown_(self):
-        if not self.human_readable: return None
-        feedback_str = ''
-        if self.feedback:
-            for f in self.feedback:
-                for k,v in f.items():
-                    feedback_str+=f'{k}: {v}\n'
-        
-        raw_markdown =  f"""
-<details>
-  <summary>Show/Collapse Run</summary>
-  
-# URLs
-Child: {self.url}
-
-Parent: {self.parent_url}
-
-Tags: {self.tags}
-
-# Inputs:
-
-{self.llm_input}
-
-# Outputs:
-
-{self.llm_output}
-
-# Feedback: {bool(self.feedback)}
-
-{feedback_str}
-
-# Error Categories: {bool(self.error_categories)}
-
-{self.error_categories}
-</details>
-"""
-        blockquoted_markdown = '\n'.join([f'> {line}' for line in raw_markdown.split('\n')])
-        return blockquoted_markdown
-    
-    def show(self):
-        self.human_readable=True
-        return self
 
 # %% ../nbs/03_experimental.ipynb 6
 class LLMDataset(BaseModel):
@@ -141,7 +100,7 @@ class LLMDataset(BaseModel):
     @classmethod
     def from_commit(cls, commit_id:str):
         "Create a `LLMDataset` from a commit id"
-        _runs = get_runs(commit_id=commit_id)
+        _runs = get_runs_by_commit(commit_id=commit_id)
         return cls.from_runs(_runs)
     
     @classmethod
@@ -149,7 +108,7 @@ class LLMDataset(BaseModel):
         "Load LLMDataset from runs."
         tag_counter=Counter()
         date_counter=Counter()
-        records=[LLMRecord.collate(r, human_readable=False) for r in runs]
+        records=[LLMRecord.collate(r) for r in runs]
         for rec in records:
             if rec.tags: tag_counter.update(rec.tags)
             if rec.start_dt: date_counter.update([rec.start_dt])
@@ -193,7 +152,7 @@ class LLMDataset(BaseModel):
         for r in data.records:
             r.tags = ', '.join(r.tags)
             r.feedback_keys = ', '.join(r.feedback_keys)
-            r.error_categories = ', '.join(r.error_categories)
+            r.warnings = ', '.join(r.warnings)
         df = pd.DataFrame(L(data.records).map(dict))
         df.to_csv(dest_path)
         return dest_path
