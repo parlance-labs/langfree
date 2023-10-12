@@ -96,23 +96,62 @@ class RunData(BaseModel):
         inputs, output, funcs = fetch_run_componets(run_id)
         return cls(inputs=inputs, output=output, funcs=funcs, run_id=run_id)
 
-# %% ../nbs/02_transform.ipynb 17
+    def to_msg_dict(self):
+        "Transform the instance into a dict in the format that can be used for OpenAI fine-tuning."
+        msgs = self.inputs + [self.output]
+        return {"functions": self.funcs,
+                "messages": msgs}
+
+    @property
+    def flat_input(self):
+        "The input to the LLM in markdown."
+        return self._flatten_data(self.inputs)
+
+    @property
+    def flat_output(self):
+        "The output of the LLM in markdown."
+        return self._flatten_data([self.output])
+
+    @classmethod	
+    def _flatten_data(cls, data):
+        "Produce a flattened view of the data as human readable Markdown."
+        md_str = ""
+        for item in data:
+            # Heading
+            role = item['role']
+            if role == 'assistant' and 'function_call' in item:
+                role += ' - function call'
+            if role == 'function':
+                role += ' - results'
+            
+            md_str += f"### {role.title()}\n\n"
+
+            content = item.get('content', '')
+            if content: md_str += content + "\n"
+                
+            elif 'function_call' in item:
+                func_name = item['function_call']['name']
+                args = json.loads(item['function_call']['arguments'])
+                formatted_args = ', '.join([f"{k}={v}" for k, v in args.items()])
+                md_str += f"{func_name}({formatted_args})\n"
+            md_str += "\n"
+        return md_str
+
+# %% ../nbs/02_transform.ipynb 24
 def _collate(cbdata:RunData, 
-             callback:callable=None) -> dict:
+             callback:callable=None) -> RunData:
     "Allow a callback to mutate `inputs`, `output`, and `funcs` and construct a dataset for fine tuning."
     if callback: cbdata = callback(cbdata)
-    msgs = cbdata.inputs + [cbdata.output]
-    return {"functions": cbdata.funcs,
-            "messages": msgs}
+    return cbdata
 
-# %% ../nbs/02_transform.ipynb 18
-def collate(run_id:str, callback:Callable[[RunData], RunData]=None) -> dict:
+# %% ../nbs/02_transform.ipynb 25
+def collate(run_id:str, callback:Callable[[RunData], RunData]=None) -> RunData:
     "Allow a callback to mutate a run for fine tuning."
     i,o,f = fetch_run_componets(run_id)
     cbdata = RunData(inputs=i, output=o, funcs=f, run_id=run_id)
     return _collate(cbdata, callback)
 
-# %% ../nbs/02_transform.ipynb 22
+# %% ../nbs/02_transform.ipynb 29
 def _sub_name_in_func(funcs, name):
     "Substitute 'Unit Test' for `name` in the `email-campaign-creator` function"
     emailfunc = L(funcs).filter(lambda x: x['name'] == 'email-campaign-creator')
@@ -123,13 +162,13 @@ def _sub_name_in_func(funcs, name):
         func['parameters']['properties']['body']['description'] = new_desc
     return funcs
 
-# %% ../nbs/02_transform.ipynb 24
+# %% ../nbs/02_transform.ipynb 31
 def _sub_name_in_output(output, name):
     "Subtitute `[Your Name]` with `name` in the output."
     output['content'] = output['content'].replace('[Your Name]', name)
     return output
 
-# %% ../nbs/02_transform.ipynb 26
+# %% ../nbs/02_transform.ipynb 33
 def _reword_input(inputs):
     "Rephrase the first human input."
     copy_inputs = copy.deepcopy(inputs)
@@ -140,7 +179,7 @@ def _reword_input(inputs):
             break
     return copy_inputs
 
-# %% ../nbs/02_transform.ipynb 28
+# %% ../nbs/02_transform.ipynb 35
 def tsfm_nm_rephrase(rundata:RunData, 
                      name=None) -> RunData:
     "An callback to be used with `collate` that substitutes names and rephrases the language model input."
@@ -152,7 +191,7 @@ def tsfm_nm_rephrase(rundata:RunData,
     tsfm_rundata = RunData(inputs=inputs, output=output, funcs=funcs, run_id=rundata.run_id)
     return tsfm_rundata
 
-# %% ../nbs/02_transform.ipynb 33
+# %% ../nbs/02_transform.ipynb 40
 def write_to_jsonl(data_list:List[dict], filename:str):
     """
     Writes a list of dictionaries to a .jsonl file.
@@ -167,7 +206,7 @@ def write_to_jsonl(data_list:List[dict], filename:str):
             json_str = json.dumps(entry)
             f.write(f"{json_str}\n")
 
-# %% ../nbs/02_transform.ipynb 36
+# %% ../nbs/02_transform.ipynb 43
 def validate_jsonl(fname):
     "Code is modified from https://cookbook.openai.com/examples/chat_finetuning_data_prep, but updated for function calling."
     # Load the dataset
