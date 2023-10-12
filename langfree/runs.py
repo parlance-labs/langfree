@@ -164,7 +164,7 @@ def get_output(run:langsmith.schemas.Run):
 
 # %% ../nbs/01_runs.ipynb 35
 def get_params(run:langsmith.schemas.Run) -> dict:
-    "Get parameters from a run logged in LangSmith"
+    "Get important parameters from a run logged in LangSmith"
     if 'invocation_params' in run.extra:
         p = run.extra['invocation_params']
         return dict(param_model_name=p.get('model'),

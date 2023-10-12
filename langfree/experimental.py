@@ -77,8 +77,7 @@ class ChatRecord(BaseModel):
             crun = [c for c in _cruns if c.name == 'ChatOpenAI'][-1]
     
         if crun:
-            _input, _output = get_input(crun), get_output(crun)
-                
+            _input, _output = get_input(crun), get_output(crun)      
             if 'Agent stopped due to max iterations' in _input: warnings.append('Max Iterations')
             if _output.strip() == '': warnings.append('No Output')
             
