@@ -8,11 +8,11 @@ Pages](https://github.com/parlance-labs/langfree/actions/workflows/deploy.yaml/b
 
 Utilities that help you extract, transform and curate
 [ChatOpenAI](https://api.python.langchain.com/en/latest/chat_models/langchain.chat_models.openai.ChatOpenAI.html)
-runs from your
+runs from
 [traces](https://js.langchain.com/docs/modules/agents/how_to/logging_and_tracing)
 stored in [LangSmith](https://www.langchain.com/langsmith). The goal is
-to facilitate using data from these runs for fine-tuning your own
-conversational models.
+to facilitate using data from these runs for fine-tuning /
+instruction-tuning models.
 
 ![](https://github.com/parlance-labs/langfree/assets/1483922/0e37d5a4-1ffb-4661-85ba-7c9eb80dd06b.png)
 
