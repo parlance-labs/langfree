@@ -1,4 +1,0 @@
----
-title: Components for Shiny
-description: "[Shiny for Python](https://shiny.posit.co/py/) is a front-end framework that allows you to quickly build simple applications.  It's perfect for customizing your own data annotation and review app for LLMs."
----

@@ -16,6 +16,41 @@ conversational models.
 
 ![](https://github.com/parlance-labs/langfree/assets/1483922/0e37d5a4-1ffb-4661-85ba-7c9eb80dd06b.png)
 
+### Motivation
+
+Langchain has native [tracing
+support](https://blog.langchain.dev/tracing/) that allows you to log
+LangChain runs. This data is a valuable resource for fine-tuning and
+evaluation. [LangSmith](https://docs.smith.langchain.com/) is a
+commercial application that facilitates some of these tasks.
+
+However, LangSmith may not work for everyone’s needs. It is often
+desirable to buid your own data inspection and curation infrastructure
+so you can add your own features.
+
+> One pattern I noticed is that great AI researchers are willing to
+> manually inspect lots of data. And more than that, **they build
+> infrastructure that allows them to manually inspect data quickly.**
+> Though not glamorous, manually examining data gives valuable
+> intuitions about the problem. The canonical example here is Andrej
+> Karpathy doing the ImageNet 2000-way classification task himself.
+>
+> – [Jason Wei, AI Researcher at
+> OpenAI](https://x.com/_jasonwei/status/1708921475829481683?s=20)
+
+`langfree` helps you export data from LangSmith and build data curation
+web applications. The goal is to empower the AI engineer to quickly
+build their own data curation tools, so they can add features like:
+
+- connectivity to additionaly data sources beyond LangSmith.
+- data transformations of runs using code
+- ability to route, tag and annotate data in custom ways
+- … etc.
+
+Furthermore,`langchain` provides a handful of [Shiny for
+Python](https://shiny.posit.co/py/) components to make the process of
+creating data curation applications easier.
+
 ## Install
 
 ``` sh
