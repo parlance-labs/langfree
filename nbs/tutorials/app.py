@@ -1,7 +1,9 @@
+import os
 from shiny import App, ui, reactive, render
 import shiny.experimental as x
 from langfree.shiny import render_input_chat, render_llm_output
 import pandas as pd
+
 
 FILENAME = "_data/sample_data.pkl"
 df = pd.read_pickle(FILENAME)
@@ -15,7 +17,11 @@ status_icons = {'Accepted': ui.HTML('<svg xmlns="http://www.w3.org/2000/svg" cla
               }
 
 app_ui = ui.page_fluid(
-    ui.panel_title("LLM Review App"),
+    ui.panel_title("Fine Tune Data Review"),
+    ui.div(
+        {"style": "position: absolute; top: 10px; right: 10px; font-size: 0.8em;"},
+        ui.a("by Parlance Labs", href="https://parlance-labs.com/")
+    ),
     x.ui.card(
         ui.layout_sidebar(
             ui.panel_sidebar(
@@ -124,4 +130,5 @@ def server(input, output, session):
         df.loc[cursor(), 'status'] = status
         status_trigger.set(not status_trigger())
 
-app = App(app_ui, server)
+abs_path = os.path.join(os.path.dirname(__file__), 'assets')
+app = App(app_ui, server, static_assets=abs_path)

@@ -17,6 +17,6 @@ website:
     search: true
   sidebar:
     style: floating
-  favicon: logo.png
+  favicon: favicon.png
 
 metadata-files: [nbdev.yml, sidebar.yml]

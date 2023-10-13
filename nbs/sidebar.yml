@@ -6,3 +6,6 @@ website:
       - 02_transform.ipynb
       - 03_chatrecord.ipynb
       - 04_shiny.ipynb
+      - section: tutorials
+        contents:
+          - tutorials/shiny.ipynb
