@@ -42,8 +42,8 @@ web applications. The goal is to empower you to build you own data
 curation tools, so you can add features like:
 
 - connectivity to data sources beyond LangSmith.
-- data transformations of runs using code.
-- ability to route, tag and annotate data in custom ways.
+- customized data transformations of runs.
+- ability to route, tag and annotate data in special ways.
 - … etc.
 
 Furthermore,`langfree` provides a handful of [Shiny for
