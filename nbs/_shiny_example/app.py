@@ -123,6 +123,5 @@ def server(input, output, session):
     def update_status(status):
         df.loc[cursor(), 'status'] = status
         status_trigger.set(not status_trigger())
-        print(status_trigger())
 
 app = App(app_ui, server)
