@@ -6,13 +6,12 @@
 [![Deploy to GitHub
 Pages](https://github.com/parlance-labs/langfree/actions/workflows/deploy.yaml/badge.svg)](https://github.com/parlance-labs/langfree/actions/workflows/deploy.yaml)
 
-Utilities that help you extract, transform and curate
+`langfree` helps you extract, transform and curate
 [ChatOpenAI](https://api.python.langchain.com/en/latest/chat_models/langchain.chat_models.openai.ChatOpenAI.html)
 runs from
 [traces](https://js.langchain.com/docs/modules/agents/how_to/logging_and_tracing)
-stored in [LangSmith](https://www.langchain.com/langsmith). The goal is
-to facilitate using data from these runs for fine-tuning /
-instruction-tuning models.
+stored in [LangSmith](https://www.langchain.com/langsmith), which can be
+used for fine-tuning and evaluation.
 
 ![](https://github.com/parlance-labs/langfree/assets/1483922/0e37d5a4-1ffb-4661-85ba-7c9eb80dd06b.png)
 
@@ -20,9 +19,9 @@ instruction-tuning models.
 
 Langchain has native [tracing
 support](https://blog.langchain.dev/tracing/) that allows you to log
-LangChain runs. This data is a valuable resource for fine-tuning and
-evaluation. [LangSmith](https://docs.smith.langchain.com/) is a
-commercial application that facilitates some of these tasks.
+runs. This data is a valuable resource for fine-tuning and evaluation.
+[LangSmith](https://docs.smith.langchain.com/) is a commercial
+application that facilitates some of these tasks.
 
 However, LangSmith may not suit everyone’s needs. It is often desirable
 to buid your own data inspection and curation infrastructure so you can
