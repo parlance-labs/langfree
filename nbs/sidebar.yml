@@ -4,5 +4,5 @@ website:
       - index.ipynb
       - 01_runs.ipynb
       - 02_transform.ipynb
-      - 03_experimental.ipynb
+      - 03_chatrecord.ipynb
       - 04_shiny.ipynb
