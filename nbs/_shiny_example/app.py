@@ -2,13 +2,11 @@ from shiny import App, ui, reactive, render
 import shiny.experimental as x
 from langfree.shiny import render_input_chat, render_llm_output
 import pandas as pd
-from langfree.experimental import ChatRecordSet
 
 FILENAME = "_data/sample_data.pkl"
-cursor = 0 
 df = pd.read_pickle(FILENAME)
-
-def save(df): df.to_csv(FILENAME)
+n_rows = len(df)
+def save(df): df.to_pickle(FILENAME)
 
 app_ui = ui.page_fluid(
     ui.panel_title("LLM Review App"),
@@ -35,54 +33,49 @@ app_ui = ui.page_fluid(
 )
 
 def server(input, output, session):
-    current_row = reactive.Value(df.loc[cursor].child_run)
+    cursor = reactive.Value(0)
+
+    @reactive.Calc
+    def current_run(): return df.loc[cursor(), 'child_run']
+
+    @reactive.Calc
+    def current_row(): return df.loc[cursor()]
 
     @output
     @render.ui
-    def llm_input():
-        return render_input_chat(current_row())
+    def llm_input(): return render_input_chat(current_run())
     
     @output
     @render.ui
-    def llm_output():
-        return render_llm_output(current_row())
+    def llm_output(): return render_llm_output(current_run())
     
-    # @reactive.Effect
-    # @reactive.event(input.reject)
-    # def reject():
-    #     global df
-    #     df.loc[cursor, 'reject'] = 1
-    #     df.loc[cursor, 'accept'] = 0
-    #     save(df)
-    #     go_next(df)
+    @reactive.Effect
+    @reactive.event(input.reject)
+    def reject():
+        current_row().accept = 0
+        current_row().reject = 1
+        go_next()
 
-    # @reactive.Effect
-    # @reactive.event(input.accept)
-    # def accept():
-    #     global df
-    #     df.loc[cursor, 'accept'] = 1
-    #     df.loc[cursor, 'reject'] = 0
-    #     child_run = df.loc[cursor, 'child_run']
-    #     child_run.output = input.json_out()
-    #     df.loc[cursor, 'child_run'] = child_run
-    #     save(df)
-    #     go_next(df)
+    @reactive.Effect
+    @reactive.event(input.accept)
+    def accept():
+        current_row().accept = 1
+        current_row().reject = 0
+        current_row().child_run.output['content'] = input.llm_output()
+        go_next()
 
-    # def modal():
-    #     m = ui.modal(
-    #         "You are done!",
-    #         title="Done",
-    #         easy_close=True,
-    #         footer=None,
-    #     )
-    #     ui.modal_show(m)
+    @reactive.Effect
+    @reactive.event(input.back)
+    def back(): 
+        if cursor() > 0: cursor.set(cursor()-1)
 
-    # def go_next(df):
-    #     global cursor
-    #     if cursor + 1 < len(df):
-    #         cursor += 1
-    #         current_row.set(df.loc[cursor])
-    #     else: modal()
+    def modal():
+        m = ui.modal("You are done!", title="Done",easy_close=True,footer=None)
+        ui.modal_show(m)
 
+    def go_next():
+        save(df)
+        if cursor() + 1 < n_rows: cursor.set(cursor()+1)
+        else: modal()
 
 app = App(app_ui, server)

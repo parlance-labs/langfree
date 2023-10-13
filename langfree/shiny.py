@@ -23,7 +23,7 @@ def _get_content(m):
         return f"{func['name']}({func['arguments']})"
     else: return m['content']
 
-def render_input_chat(run:RunData):
+def render_input_chat(run:RunData, markdown=True):
     "Render the chat history, except for the last output as a group of cards."
     cards = []
     num_inputs = len(run.inputs)
@@ -39,14 +39,15 @@ def render_input_chat(run:RunData):
                                     ui.span(f'({i+1}/{num_inputs})'),
                                 )       
                 ),
-                x.ui.card_body(ui.markdown(content)),
+                x.ui.card_body(ui.markdown(content) if markdown else content),
+                class_= "card border-dark mb-3"
             )
         )
     return ui.div(*cards)
 
 # %% ../nbs/04_shiny.ipynb 14
-def render_llm_output(run):
+def render_llm_output(run, width="100%", height="250px"):
     "Render the LLM output as an editable text box."
     o = run.output
     return ui.input_text_area('llm_output', label='LLM Output', 
-                              value=o['content'], width="100%", height="250px")
+                              value=o['content'], width=width, height=height)
