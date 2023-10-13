@@ -39,17 +39,17 @@ so you can add your own features.
 > OpenAI](https://x.com/_jasonwei/status/1708921475829481683?s=20)
 
 `langfree` helps you export data from LangSmith and build data curation
-web applications. The goal is to empower the AI engineer to quickly
-build their own data curation tools, so they can add features like:
+web applications. The goal is to empower you to build you own data
+curation tools, so you can add features like:
 
-- connectivity to additionaly data sources beyond LangSmith.
-- data transformations of runs using code
-- ability to route, tag and annotate data in custom ways
+- connectivity to data sources beyond LangSmith.
+- data transformations of runs using code.
+- ability to route, tag and annotate data in custom ways.
 - … etc.
 
-Furthermore,`langchain` provides a handful of [Shiny for
-Python](https://shiny.posit.co/py/) components to make the process of
-creating data curation applications easier.
+Furthermore,`langfree` provides a handful of [Shiny for
+Python](04_shiny.ipynb) components to make the process of creating data
+curation applications easier.
 
 ## Install
 
