@@ -24,9 +24,9 @@ LangChain runs. This data is a valuable resource for fine-tuning and
 evaluation. [LangSmith](https://docs.smith.langchain.com/) is a
 commercial application that facilitates some of these tasks.
 
-However, LangSmith may not work for everyone’s needs. It is often
-desirable to buid your own data inspection and curation infrastructure
-so you can add your own features.
+However, LangSmith may not suit everyone’s needs. It is often desirable
+to buid your own data inspection and curation infrastructure so you can
+add your own features.
 
 > One pattern I noticed is that great AI researchers are willing to
 > manually inspect lots of data. And more than that, **they build
