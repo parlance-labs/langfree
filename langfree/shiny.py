@@ -5,12 +5,11 @@ __all__ = ['render_input_chat', 'render_llm_output']
 
 # %% ../nbs/04_shiny.ipynb 3
 import os
-from .runs import _temp_env_var
 from .transform import RunData
 from shiny import module, ui, render
 import shiny.experimental as x
 
-# %% ../nbs/04_shiny.ipynb 4
+# %% ../nbs/04_shiny.ipynb 5
 def _get_role(m):
     role = m['role'].upper()
     if 'function_call' in m: return f"{role} - Function Call"
@@ -45,7 +44,7 @@ def render_input_chat(run:RunData, markdown=True):
         )
     return ui.div(*cards)
 
-# %% ../nbs/04_shiny.ipynb 14
+# %% ../nbs/04_shiny.ipynb 15
 def render_llm_output(run, width="100%", height="250px"):
     "Render the LLM output as an editable text box."
     o = run.output

@@ -62,7 +62,8 @@ def get_runs_by_commit(commit_id:str=None, # The commit ID to filter by
              only_success=True, # Only include runs that are successfull
              run_type='chain', # The run type
              start_dt:str=None, # The start date to filter by
-             end_dt:str=None    # the end date to filter by
+             end_dt:str=None,    # the end date to filter by
+             limit:int=None       # The maximum number of runs to return
             ):
     "Get all runs tagged with a particular commit id (the short version of the SHA) in LangSmith."
     
@@ -79,7 +80,8 @@ def get_runs_by_commit(commit_id:str=None, # The commit ID to filter by
     queries = ', '.join(L([success_query, commit_query, time_query]).filter())
     query_string = None if not queries else f'and({queries})'
     if query_string: print(f'Fetching runs with this filter: {query_string}')
-        
+
+    client = Client()
     runs = client.list_runs(
         filter=query_string,
         project_id=proj_id,
@@ -87,7 +89,7 @@ def get_runs_by_commit(commit_id:str=None, # The commit ID to filter by
         error=False,
         run_type=run_type,
     )
-    return runs
+    return list(runs) if limit is None else take(runs, limit)
 
 # %% ../nbs/01_runs.ipynb 12
 def get_last_child(runs: List[langsmith.schemas.Run]):
@@ -95,8 +97,9 @@ def get_last_child(runs: List[langsmith.schemas.Run]):
     return [client.read_run(r.child_run_ids[-1]) for r in runs if r.child_run_ids]
 
 # %% ../nbs/01_runs.ipynb 15
-def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2):
+def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2, limit=None):
     "Get recent runs from Langsmith.  If `start_dt` is None gets the `last_n_days`."
+    client = Client()
     if start_dt is None:
         _runs = client.list_runs(project_id=check_api_key("LANGSMITH_PROJECT_ID"), limit=1)
         latest_run_dt = first(_runs).start_time
@@ -117,7 +120,7 @@ def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2):
     
     runs = get_runs_by_commit(start_dt=start_dt_obj.strftime('%m/%d/%Y'),
                     end_dt=end_dt_obj.strftime('%m/%d/%Y'))
-    return runs
+    return list(runs) if limit is None else take(runs, limit)
 
 # %% ../nbs/01_runs.ipynb 18
 def get_recent_commit_tags(start_dt=None, end_dt=None, last_n_days=2, return_df=False):

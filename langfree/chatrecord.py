@@ -16,7 +16,7 @@ from fastcore.foundation import first, L
 from fastcore.test import test_eq
 from .runs import (get_runs_by_commit, 
                            get_params, get_functions,
-                          get_feedback, take)
+                          get_feedback)
 from .transform import RunData
 from langsmith import Client
 
@@ -102,21 +102,19 @@ class ChatRecordSet(BaseModel):
     
     @classmethod
     def from_commit(cls, commit_id:str, limit:int=None):
-        "Create a `LLMDataset` from a commit id"
-        _runs = get_runs_by_commit(commit_id=commit_id)
-        if limit: 
-            _runs=take(_runs, limit)
+        "Create a `ChatRecordSet` from a commit id"
+        _runs = get_runs_by_commit(commit_id=commit_id, limit=limit)
         return cls.from_runs(_runs)
     
     @classmethod
     def from_runs(cls, runs:List[langsmith.schemas.Run]):
-        "Load LLMDataset from runs."
+        "Load ChatRecordSet from runs."
         _records=L([ChatRecord.from_run(r) for r in runs]).filter()
         return cls(records=list(_records))
 
     @classmethod
     def from_run_ids(cls, runs:List[str]):
-        "Load LLMDataset from run ids."
+        "Load ChatRecordSet from run ids."
         _records=L([ChatRecord.from_run_id(r) for r in runs]).filter()
         return cls(records=list(_records))
     
@@ -152,6 +150,10 @@ class ChatRecordSet(BaseModel):
                 raise TypeError(f"The loaded object is not of type {cls.__name__}")
                 
     def to_pandas(self):
-        "Convert the `LLMDataset` to a pandas.DataFrame."
+        "Convert the `ChatRecordSet` to a pandas.DataFrame."
         records = L(self.records).map(dict)                      
         return pd.DataFrame(records)
+
+    def to_dicts(self):
+        "Convert the ChatRecordSet to a list of dicts, which you can convert to jsonl."
+        return list(L(self.records).map(lambda x: x.child_run.to_msg_dict()))
