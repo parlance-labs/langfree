@@ -191,7 +191,7 @@ To learn how to run and customize this kind of tool, [read the
 tutorial](tutorials/shiny.ipynb). `langfree` can help you quickly build
 something that looks like this:
 
-![](tutorials/langfree.png)
+![](https://github.com/parlance-labs/langfree/assets/1483922/57d98336-d43f-432b-a730-e41261168cb2.png)
 
 ## Documentation
 
