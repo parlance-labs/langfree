@@ -57,6 +57,8 @@ pip install langfree
 
 ## How to use
 
+See the [docs site](http://langfree.parlance-labs.com/).
+
 ### Get runs from LangSmith
 
 The [runs](01_runs.ipynb) module contains some utilities to quickly get
