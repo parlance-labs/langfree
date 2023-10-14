@@ -24,8 +24,7 @@ runs. This data is a valuable resource for fine-tuning and evaluation.
 application that facilitates some of these tasks.
 
 However, LangSmith may not suit everyone’s needs. It is often desirable
-to buid your own data inspection and curation infrastructure so you can
-add your own features.
+to buid your own data inspection and curation infrastructure:
 
 > One pattern I noticed is that great AI researchers are willing to
 > manually inspect lots of data. And more than that, **they build
@@ -38,8 +37,8 @@ add your own features.
 > OpenAI](https://x.com/_jasonwei/status/1708921475829481683?s=20)
 
 `langfree` helps you export data from LangSmith and build data curation
-web applications. The goal is to empower you to build you own data
-curation tools, so you can add features like:
+web applications. By building you own data curation tools, so you can
+add features you need like:
 
 - connectivity to data sources beyond LangSmith.
 - customized data transformations of runs.
