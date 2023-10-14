@@ -37,8 +37,8 @@ to buid your own data inspection and curation infrastructure:
 > OpenAI](https://x.com/_jasonwei/status/1708921475829481683?s=20)
 
 `langfree` helps you export data from LangSmith and build data curation
-web applications. By building you own data curation tools, so you can
-add features you need like:
+tools. By building you own data curation tools, so you can add features
+you need like:
 
 - connectivity to data sources beyond LangSmith.
 - customized data transformations of runs.
@@ -46,8 +46,8 @@ add features you need like:
 - … etc.
 
 Furthermore,`langfree` provides a handful of [Shiny for
-Python](04_shiny.ipynb) components to make the process of creating data
-curation applications easier.
+Python](04_shiny.ipynb) components ease the process of creating data
+curation applications.
 
 ## Install
 
@@ -198,6 +198,41 @@ something that looks like this:
 ## Documentation
 
 See the [docs site](http://langfree.parlance-labs.com/).
+
+## FAQ
+
+1.  **We don’t use LangChain. Can we still use something from this
+    library?** No, not directly. However, we recommend looking at how
+    the [Shiny for Python App works](tutorials/shiny.ipynb) so you can
+    adapt it towards your own use cases.
+
+2.  **Why did you use [Shiny For Python](https://shiny.posit.co/py/)?**
+    Python has many great front-end libraries like Gradio, Streamlit,
+    Panel and others. However, we liked Shiny For Python the best,
+    because of its reactive model, modularity, strong integration with
+    [Quarto](https://quarto.org/), and [WASM
+    support](https://shiny.posit.co/py/docs/shinylive.html). You can
+    read more about it
+    [here](https://shiny.posit.co/py/docs/overview.html).
+
+3.  **Does this only work with runs from LangChain/LangSmith?** Yes,
+    `langfree` has only been tested with `LangChain` runs that have been
+    logged to`LangSmith`, however we suspect that you could log your
+    traces elsewhere and pull them in a similar manner.
+
+4.  **Does this only work with
+    [`ChatOpenAI`](https://api.python.langchain.com/en/latest/chat_models/langchain.chat_models.openai.ChatOpenAI.html)
+    runs?** A: Yes, `langfree` is opinionated and only works with runs
+    that use chat models from OpenAI (which use
+    [`ChatOpenAI`](https://api.python.langchain.com/en/latest/chat_models/langchain.chat_models.openai.ChatOpenAI.html)
+    in LangChain). We didn’t want to over-generalize this tool too
+    quickly and started with the most popular combination of things.
+
+5.  **Do you offer support?**: These tools are free and licensed under
+    [Apache
+    2.0](https://github.com/parlance-labs/langfree/blob/main/LICENSE).
+    If you want support or customization, feel free to [reach out to
+    us](https://parlance-labs.com/).
 
 ## Contributing
 
