@@ -102,6 +102,10 @@ class RunData(BaseModel):
         return {"functions": self.funcs,
                 "messages": msgs}
 
+    def to_json(self):
+        "The json version of `to_msg_dict`."
+        return json.dumps(self.to_msg_dict())
+
     @property
     def flat_input(self):
         "The input to the LLM in markdown."
@@ -137,7 +141,7 @@ class RunData(BaseModel):
             md_str += "\n"
         return md_str
 
-# %% ../nbs/02_transform.ipynb 24
+# %% ../nbs/02_transform.ipynb 26
 def _sub_name_in_func(funcs, name):
     "Substitute 'Unit Test' for `name` in the `email-campaign-creator` function"
     emailfunc = L(funcs).filter(lambda x: x['name'] == 'email-campaign-creator')
@@ -148,13 +152,13 @@ def _sub_name_in_func(funcs, name):
         func['parameters']['properties']['body']['description'] = new_desc
     return funcs
 
-# %% ../nbs/02_transform.ipynb 26
+# %% ../nbs/02_transform.ipynb 28
 def _sub_name_in_output(output, name):
     "Subtitute `[Your Name]` with `name` in the output."
     output['content'] = output['content'].replace('[Your Name]', name)
     return output
 
-# %% ../nbs/02_transform.ipynb 28
+# %% ../nbs/02_transform.ipynb 30
 def reword_input(inputs):
     "Rephrase the first human input."
     copy_inputs = copy.deepcopy(inputs)
@@ -165,7 +169,7 @@ def reword_input(inputs):
             break
     return copy_inputs
 
-# %% ../nbs/02_transform.ipynb 30
+# %% ../nbs/02_transform.ipynb 32
 def tsfm_nm_rephrase(rundata:RunData, name=None) -> RunData:
     "Substitutes names in functions & outputs and rephrases the language model input."
     if name is None: name=gen_name()                    # generates a random name to be used to substitute a boilerplate name
@@ -175,22 +179,21 @@ def tsfm_nm_rephrase(rundata:RunData, name=None) -> RunData:
     funcs = _sub_name_in_func(rundata.funcs, name)      # substitutes the template `[Your Name]` with `name` in the a function schema description
     return RunData(inputs=inputs, output=output, funcs=funcs, run_id=rundata.run_id)
 
-# %% ../nbs/02_transform.ipynb 35
-def write_to_jsonl(data_list:List[dict], filename:str):
+# %% ../nbs/02_transform.ipynb 37
+def write_to_jsonl(data_list:List[RunData], filename:str):
     """
     Writes a list of dictionaries to a .jsonl file.
     
     Parameters:
-    - data_list (list of dicts): The data to be written.
+    - data_list (list of `RunData`): The data to be written.
     - filename (str): The name of the output file.
     """
     shuffle(data_list)
     with open(filename, 'w') as f:
         for entry in data_list:
-            json_str = json.dumps(entry)
-            f.write(f"{json_str}\n")
+            f.write(f"{entry.to_json()}\n")
 
-# %% ../nbs/02_transform.ipynb 38
+# %% ../nbs/02_transform.ipynb 40
 def validate_jsonl(fname):
     "Code is modified from https://cookbook.openai.com/examples/chat_finetuning_data_prep, but updated for function calling."
     # Load the dataset
