@@ -73,7 +73,10 @@ class ChatRecord(BaseModel):
         if _cruns:
             if _cruns[-1].name != 'ChatOpenAI': 
                 warnings.append('Last Step Not ChatOpenAI')
-            crun = [c for c in _cruns if c.name == 'ChatOpenAI'][-1]
+            chatoai_runs = [c for c in _cruns if c.name == 'ChatOpenAI']
+            if chatoai_runs: crun = chatoai_runs[-1]
+            else:
+                raise ValueError(f'Not able to find ChatOpenAI run in {run.id}')
     
         if crun:
             params = get_params(crun)
