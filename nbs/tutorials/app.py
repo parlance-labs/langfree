@@ -41,7 +41,7 @@ app_ui = ui.page_fluid(
         ui.div(
             {"style": "display: flex; justify-content:center;"},
             ui.input_action_button("accept", label="Accept", class_='btn-success', width="10%",  style="margin-right: 10px;"),
-            ui.input_action_button("reject", label="Reject", class_='btn-danger', width="10%",  style="margin-right: 50px;", disabled=True),
+            ui.input_action_button("reject", label="Reject", class_='btn-danger', width="10%",  style="margin-right: 50px;"),
             ui.input_action_button("back", label="Back", class_='btn-secondary', width="10%", style="margin-right: 10px;"),
             ui.input_action_button("reset", label="Reset", class_='btn-warning', width="10%", style="margin-right: 10px;"),
             ui.input_action_button("next", label="Next", class_='btn-secondary', width="10%", style="margin-right: 10px;"),
