@@ -106,7 +106,7 @@ def server(input, output, session):
     def accept():
         update_status('Accepted')
         current_row().child_run.output['content'] = input.llm_output()
-        invoke_later(1, go_next)
+        go_next()
 
     @reactive.Effect
     @reactive.event(input.back)
