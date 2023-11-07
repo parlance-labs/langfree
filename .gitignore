@@ -2,6 +2,7 @@ _docs/
 _proc/
 nbs/_data/
 !nbs/shiny_example/_data/sample_data.pkl
+_data/
 
 *.bak
 .gitattributes
