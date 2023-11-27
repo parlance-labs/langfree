@@ -46,7 +46,7 @@ you need like:
 - … etc.
 
 Furthermore,`langfree` provides a handful of [Shiny for
-Python](04_shiny.ipynb) components ease the process of creating data
+Python](nbs/04_shiny.ipynb) components ease the process of creating data
 curation applications.
 
 ## Install
@@ -61,7 +61,7 @@ See the [docs site](http://langfree.parlance-labs.com/).
 
 ### Get runs from LangSmith
 
-The [runs](01_runs.ipynb) module contains some utilities to quickly get
+The [runs](nbs/01_runs.ipynb) module contains some utilities to quickly get
 runs. We can get the recent runs from langsmith like so:
 
 ``` python
@@ -190,7 +190,7 @@ from LangChain runs. Next, you can feed this data into a tool to help
 you curate this data for fine tuning.
 
 To learn how to run and customize this kind of tool, [read the
-tutorial](tutorials/shiny.ipynb). `langfree` can help you quickly build
+tutorial](nbs/tutorials/shiny.ipynb). `langfree` can help you quickly build
 something that looks like this:
 
 ![](https://github.com/parlance-labs/langfree/assets/1483922/57d98336-d43f-432b-a730-e41261168cb2.png)
@@ -203,7 +203,7 @@ See the [docs site](http://langfree.parlance-labs.com/).
 
 1.  **We don’t use LangChain. Can we still use something from this
     library?** No, not directly. However, we recommend looking at how
-    the [Shiny for Python App works](tutorials/shiny.ipynb) so you can
+    the [Shiny for Python App works](nbs/tutorials/shiny.ipynb) so you can
     adapt it towards your own use cases.
 
 2.  **Why did you use [Shiny For Python](https://shiny.posit.co/py/)?**
