@@ -5,6 +5,7 @@ __all__ = ['render_input_chat', 'render_funcs', 'render_llm_output', 'invoke_lat
 
 # %% ../nbs/04_shiny.ipynb 3
 import os, json
+from pprint import pformat
 from .transform import RunData
 from shiny import module, ui, render, reactive
 import shiny.experimental as x
@@ -29,6 +30,9 @@ def render_input_chat(run:RunData, markdown=True):
     num_inputs = len(run.inputs)
     for i,m in enumerate(run.inputs):
         content = str(_get_content(m))
+        if _get_role(m) == 'FUNCTION RESULTS':
+            try: content = '```json\n' + pformat(json.loads(content)) + '\n```'
+            except: pass
         cards.append(
             x.ui.card(
                 x.ui.card_header(ui.div({"style": "display: flex; justify-content: space-between;"},
@@ -45,7 +49,7 @@ def render_input_chat(run:RunData, markdown=True):
         )
     return ui.div(*cards)
 
-# %% ../nbs/04_shiny.ipynb 15
+# %% ../nbs/04_shiny.ipynb 17
 def render_funcs(run:RunData, markdown=True):
     "Render functions as a group of cards."
     cards = []
@@ -74,14 +78,14 @@ def render_funcs(run:RunData, markdown=True):
             )
     return ui.div(*cards)
 
-# %% ../nbs/04_shiny.ipynb 22
+# %% ../nbs/04_shiny.ipynb 24
 def render_llm_output(run, width="100%", height="250px"):
     "Render the LLM output as an editable text box."
     o = run.output
     return ui.input_text_area('llm_output', label=ui.h3('LLM Output (Editable)'), 
                               value=o['content'], width=width, height=height)
 
-# %% ../nbs/04_shiny.ipynb 26
+# %% ../nbs/04_shiny.ipynb 28
 def invoke_later(delaySecs:int, callback:callable):
     "Execute code in a shiny app with a time delay of `delaySecs` asynchronously."
     async def delay_task():
