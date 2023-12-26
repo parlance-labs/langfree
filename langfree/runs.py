@@ -4,7 +4,7 @@
 __all__ = ['client', 'check_api_key', 'take', 'get_runs_by_commit', 'get_last_child', 'get_recent_runs', 'get_recent_commit_tags',
            'get_params', 'get_functions', 'get_feedback']
 
-# %% ../nbs/01_runs.ipynb 2
+# %% ../nbs/01_runs.ipynb 3
 from collections import defaultdict
 import os
 from datetime import date, timedelta, datetime
@@ -19,7 +19,7 @@ import langsmith
 from langsmith import Client
 from fastcore.foundation import L, first
 
-# %% ../nbs/01_runs.ipynb 3
+# %% ../nbs/01_runs.ipynb 4
 @contextmanager
 def _temp_env_var(vars_dict):
     "Temporarily set environment variables (for testing)"
@@ -39,24 +39,24 @@ def _temp_env_var(vars_dict):
             else:
                 os.environ[name] = original_value
 
-# %% ../nbs/01_runs.ipynb 4
+# %% ../nbs/01_runs.ipynb 5
 def check_api_key(nm="LANGCHAIN_HUB_API_KEY"):
     val = os.getenv(nm)
     if not val: raise Exception(f"You must set the environment variable {nm}")
     return val
 
-# %% ../nbs/01_runs.ipynb 5
+# %% ../nbs/01_runs.ipynb 6
 check_api_key("LANGCHAIN_API_KEY")
 check_api_key("LANGCHAIN_ENDPOINT")
 check_api_key("LANGSMITH_PROJECT_ID")
 client = Client()
 
-# %% ../nbs/01_runs.ipynb 7
+# %% ../nbs/01_runs.ipynb 8
 def take(l:Iterable, n:int):
     "Take first n entries from a generator"
     return L(islice(l, n))
 
-# %% ../nbs/01_runs.ipynb 8
+# %% ../nbs/01_runs.ipynb 9
 def get_runs_by_commit(commit_id:str=None, # The commit ID to filter by 
              proj_id:str=None, # Langsmith Project ID
              only_success=True, # Only include runs that are successfull
@@ -91,12 +91,12 @@ def get_runs_by_commit(commit_id:str=None, # The commit ID to filter by
     )
     return list(runs) if limit is None else take(runs, limit)
 
-# %% ../nbs/01_runs.ipynb 12
+# %% ../nbs/01_runs.ipynb 13
 def get_last_child(runs: List[langsmith.schemas.Run]):
     "Get the child runs for a list of runs."
     return [client.read_run(r.child_run_ids[-1]) for r in runs if r.child_run_ids]
 
-# %% ../nbs/01_runs.ipynb 15
+# %% ../nbs/01_runs.ipynb 16
 def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2, limit=None):
     "Get recent runs from Langsmith.  If `start_dt` is None gets the `last_n_days`."
     client = Client()
@@ -122,7 +122,7 @@ def get_recent_runs(start_dt=None, end_dt=None, last_n_days=2, limit=None):
                     end_dt=end_dt_obj.strftime('%m/%d/%Y'))
     return list(runs) if limit is None else take(runs, limit)
 
-# %% ../nbs/01_runs.ipynb 18
+# %% ../nbs/01_runs.ipynb 19
 def get_recent_commit_tags(start_dt=None, end_dt=None, last_n_days=2, return_df=False):
     "Print a table of recent commit SHAs from Langsmith along with their counts that you can filter on"
     runs = L(get_recent_runs(start_dt=start_dt, end_dt=end_dt, last_n_days=last_n_days))
@@ -143,12 +143,12 @@ def get_recent_commit_tags(start_dt=None, end_dt=None, last_n_days=2, return_df=
         print(f'No commits found for {start_dt} - {end_dt}')
         return None
 
-# %% ../nbs/01_runs.ipynb 26
+# %% ../nbs/01_runs.ipynb 27
 def _ischatopenai(run): 
     if run.name != 'ChatOpenAI':
         raise TypeError(f'Run: {run.id} is of type `{run.name}`, but can only parse `ChatOpenAI` runs.')
 
-# %% ../nbs/01_runs.ipynb 27
+# %% ../nbs/01_runs.ipynb 28
 def get_params(run:langsmith.schemas.Run) -> dict:
     "Get important parameters from a run logged in LangSmith"
     if 'invocation_params' in run.extra:
@@ -162,7 +162,7 @@ def get_params(run:langsmith.schemas.Run) -> dict:
                    )
     else: return {}    
 
-# %% ../nbs/01_runs.ipynb 29
+# %% ../nbs/01_runs.ipynb 30
 def get_functions(run:langsmith.schemas.Run) -> List[dict]:
     "Get function definitions from a LangSmith run."
     if 'invocation_params' in run.extra:
@@ -170,7 +170,7 @@ def get_functions(run:langsmith.schemas.Run) -> List[dict]:
         return p.get('functions', [])
     else: return []
 
-# %% ../nbs/01_runs.ipynb 32
+# %% ../nbs/01_runs.ipynb 33
 def get_feedback(run:langsmith.schemas.Run) -> list:
     "Get feedback from a run if exists."
     raw = L(client.list_feedback(run_ids=[run.id]))
