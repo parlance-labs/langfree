@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="common transformations for LLM data">
+
+<title>langfree - transform</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./favicon.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="langfree - transform">
+<meta property="og:description" content="common transformations for LLM data">
+<meta property="og:image" content="https://parlance-labs.github.io/langfree/langfree.png">
+<meta property="og:site-name" content="langfree">
+<meta property="og:image:height" content="586">
+<meta property="og:image:width" content="800">
+<meta name="twitter:title" content="langfree - transform">
+<meta name="twitter:description" content="common transformations for LLM data">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">langfree</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./transform.html">transform</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">langfree</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./runs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">runs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./transform.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">transform</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chatrecord.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">chatrecord</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./shiny.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">shiny</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorials/shiny.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">App To Review LLM Data</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#chat" id="toc-chat" class="nav-link active" data-scroll-target="#chat">chat</a></li>
+  <li><a href="#rephrase" id="toc-rephrase" class="nav-link" data-scroll-target="#rephrase">rephrase</a></li>
+  <li><a href="#gen_name" id="toc-gen_name" class="nav-link" data-scroll-target="#gen_name">gen_name</a></li>
+  <li><a href="#fetch_run_componets" id="toc-fetch_run_componets" class="nav-link" data-scroll-target="#fetch_run_componets">fetch_run_componets</a></li>
+  <li><a href="#rundata" id="toc-rundata" class="nav-link" data-scroll-target="#rundata">RunData</a></li>
+  <li><a href="#transformations" id="toc-transformations" class="nav-link" data-scroll-target="#transformations">Transformations</a>
+  <ul class="collapse">
+  <li><a href="#reword_input" id="toc-reword_input" class="nav-link" data-scroll-target="#reword_input">reword_input</a></li>
+  </ul></li>
+  <li><a href="#preparing-.jsonl-files" id="toc-preparing-.jsonl-files" class="nav-link" data-scroll-target="#preparing-.jsonl-files">Preparing <code>.jsonl</code> files</a>
+  <ul class="collapse">
+  <li><a href="#write_to_jsonl" id="toc-write_to_jsonl" class="nav-link" data-scroll-target="#write_to_jsonl">write_to_jsonl</a></li>
+  <li><a href="#validate_jsonl" id="toc-validate_jsonl" class="nav-link" data-scroll-target="#validate_jsonl">validate_jsonl</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/parlance-labs/langfree/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">transform</h1>
+</div>
+
+<div>
+  <div class="description">
+    common transformations for LLM data
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nbdev.showdoc <span class="im">import</span> show_doc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@retry</span>(wait<span class="op">=</span>wait_random_exponential(<span class="bu">min</span><span class="op">=</span><span class="dv">1</span>, <span class="bu">max</span><span class="op">=</span><span class="dv">60</span>), stop<span class="op">=</span>stop_after_attempt(<span class="dv">6</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chat(<span class="op">**</span>kwargs):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"A wrapper around `openai.ChatCompletion` that has automatic retries."</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    client.api_key <span class="op">=</span> os.environ[<span class="st">'OPENAI_API_KEY'</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> client.chat.completions.create(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L31" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="chat" class="level3">
+<h3 class="anchored" data-anchor-id="chat">chat</h3>
+<blockquote class="blockquote">
+<pre><code> chat (**kwargs)</code></pre>
+</blockquote>
+<p>A wrapper around <code>openai.ChatCompletion</code> that has automatic retries.</p>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L37" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rephrase" class="level3">
+<h3 class="anchored" data-anchor-id="rephrase">rephrase</h3>
+<blockquote class="blockquote">
+<pre><code> rephrase (sentence, max_tokens=100, temperature=0.95)</code></pre>
+</blockquote>
+<p>Rephrase a sentence. Useful for data augmentation for finetuning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>_phrase <span class="op">=</span> <span class="st">'Write an email to example@gmail.com asking if we can move the appointment to friday'</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rephrase(_phrase))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Email example@gmail.com to inquire about rescheduling the appointment to Friday.</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L66" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="gen_name" class="level3">
+<h3 class="anchored" data-anchor-id="gen_name">gen_name</h3>
+<blockquote class="blockquote">
+<pre><code> gen_name ()</code></pre>
+</blockquote>
+<p>Generate a random name, usefule for data augmentation and privacy.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(gen_name())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Autumn Summers
+Liam Chambers
+John Harrison</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L74" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fetch_run_componets" class="level3">
+<h3 class="anchored" data-anchor-id="fetch_run_componets">fetch_run_componets</h3>
+<blockquote class="blockquote">
+<pre><code> fetch_run_componets (run_id:str)</code></pre>
+</blockquote>
+<p>Return the <code>inputs</code>, <code>output</code> and <code>funcs</code> for a run of type <code>ChatOpenAI</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>_tst_run_id <span class="op">=</span> <span class="st">'1863d76e-1462-489a-a8a7-e0404239fe47'</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> _temp_env_var(tmp_env):  <span class="co">#context manager that has specific environment vars for testing                    </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    _inp, _out, _funcs <span class="op">=</span> fetch_run_componets(_tst_run_id)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"""first input:</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>_inp[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> </span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="ss">output:</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>_out<span class="sc">}</span><span class="ss"> </span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="ss">functions:</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>_funcs<span class="sc">}</span><span class="ss">"""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>first input:
+{'role': 'system', 'content': "You are a helpful documentation Q&amp;A assistant, trained to answer questions from LangSmith's documentation. LangChain is a framework for building applications using large language models.\nThe current time is 2023-09-05 16:49:07.308007.\n\nRelevant documents will be retrieved in the following messages."} 
+
+output:
+{'role': 'assistant', 'content': "Currently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Here's an example of exporting runs:\n\n1. Read the runs from the source organization using the SDK.\n2. Write the runs to the destination organization using the SDK.\n\nBy following this process, you can transfer your runs from one organization to another. However, it may be faster to create a new project within your destination organization and start fresh.\n\nIf you have any further questions or need assistance, please reach out to us at support@langchain.dev."} 
+
+functions:
+[]</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RunData(BaseModel):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Key components of a run from LangSmith"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    inputs:List[<span class="bu">dict</span>]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    output:<span class="bu">dict</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    funcs:List[<span class="bu">dict</span>] </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    run_id:<span class="bu">str</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> from_run_id(cls, run_id:<span class="bu">str</span>):</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">"Create a `RunData` object from a run id."</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        inputs, output, funcs <span class="op">=</span> fetch_run_componets(run_id)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(inputs<span class="op">=</span>inputs, output<span class="op">=</span>output, funcs<span class="op">=</span>funcs, run_id<span class="op">=</span>run_id)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to_msg_dict(<span class="va">self</span>):</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">"Transform the instance into a dict in the format that can be used for OpenAI fine-tuning."</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        msgs <span class="op">=</span> <span class="va">self</span>.inputs <span class="op">+</span> [<span class="va">self</span>.output]</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">"functions"</span>: <span class="va">self</span>.funcs,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"messages"</span>: msgs}</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to_json(<span class="va">self</span>):</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">"The json version of `to_msg_dict`."</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> json.dumps(<span class="va">self</span>.to_msg_dict())</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">@property</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> flat_input(<span class="va">self</span>):</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">"The input to the LLM in markdown."</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._flatten_data(<span class="va">self</span>.inputs)</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">@property</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> flat_output(<span class="va">self</span>):</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">"The output of the LLM in markdown."</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._flatten_data([<span class="va">self</span>.output])</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span>    </span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _flatten_data(cls, data):</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">"Produce a flattened view of the data as human readable Markdown."</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        md_str <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> item <span class="kw">in</span> data:</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Heading</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>            role <span class="op">=</span> item[<span class="st">'role'</span>]</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> role <span class="op">==</span> <span class="st">'assistant'</span> <span class="kw">and</span> <span class="st">'function_call'</span> <span class="kw">in</span> item:</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>                role <span class="op">+=</span> <span class="st">' - function call'</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> role <span class="op">==</span> <span class="st">'function'</span>:</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>                role <span class="op">+=</span> <span class="st">' - results'</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>            md_str <span class="op">+=</span> <span class="ss">f"### </span><span class="sc">{</span>role<span class="sc">.</span>title()<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>            content <span class="op">=</span> item.get(<span class="st">'content'</span>, <span class="st">''</span>)</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> content: md_str <span class="op">+=</span> content <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> <span class="st">'function_call'</span> <span class="kw">in</span> item:</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>                func_name <span class="op">=</span> item[<span class="st">'function_call'</span>][<span class="st">'name'</span>]</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>                args <span class="op">=</span> json.loads(item[<span class="st">'function_call'</span>][<span class="st">'arguments'</span>])</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>                formatted_args <span class="op">=</span> <span class="st">', '</span>.join([<span class="ss">f"</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">=</span><span class="sc">{</span>v<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k, v <span class="kw">in</span> args.items()])</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>                md_str <span class="op">+=</span> <span class="ss">f"</span><span class="sc">{</span>func_name<span class="sc">}</span><span class="ss">(</span><span class="sc">{</span>formatted_args<span class="sc">}</span><span class="ss">)</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>            md_str <span class="op">+=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> md_str</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L90" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rundata" class="level3">
+<h3 class="anchored" data-anchor-id="rundata">RunData</h3>
+<blockquote class="blockquote">
+<pre><code> RunData (inputs:List[dict], output:dict, funcs:List[dict], run_id:str)</code></pre>
+</blockquote>
+<p>Key components of a run from LangSmith</p>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L98" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="rundata.from_run_id" class="level4">
+<h4 class="anchored" data-anchor-id="rundata.from_run_id">RunData.from_run_id</h4>
+<blockquote class="blockquote">
+<pre><code> RunData.from_run_id (run_id:str)</code></pre>
+</blockquote>
+<p>Create a <a href="https://parlance-labs.github.io/langfree/transform.html#rundata"><code>RunData</code></a> object from a run id.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> _temp_env_var(tmp_env): <span class="co">#context manager that has specific environment vars for testing</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    rd <span class="op">=</span> RunData.from_run_id(_tst_run_id)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Run </span><span class="sc">{</span>rd<span class="sc">.</span>run_id<span class="sc">}</span><span class="ss"> has </span><span class="sc">{</span><span class="bu">len</span>(rd.inputs)<span class="sc">}</span><span class="ss"> inputs.'</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Run </span><span class="sc">{</span>rd<span class="sc">.</span>run_id<span class="sc">}</span><span class="ss"> output:</span><span class="ch">\n</span><span class="sc">{</span>rd<span class="sc">.</span>output<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Run 1863d76e-1462-489a-a8a7-e0404239fe47 has 3 inputs.
+Run 1863d76e-1462-489a-a8a7-e0404239fe47 output:
+{'role': 'assistant', 'content': "Currently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Here's an example of exporting runs:\n\n1. Read the runs from the source organization using the SDK.\n2. Write the runs to the destination organization using the SDK.\n\nBy following this process, you can transfer your runs from one organization to another. However, it may be faster to create a new project within your destination organization and start fresh.\n\nIf you have any further questions or need assistance, please reach out to us at support@langchain.dev."}</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L103" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rundata.to_msg_dict" class="level4">
+<h4 class="anchored" data-anchor-id="rundata.to_msg_dict">RunData.to_msg_dict</h4>
+<blockquote class="blockquote">
+<pre><code> RunData.to_msg_dict ()</code></pre>
+</blockquote>
+<p>Transform the instance into a dict in the format that can be used for OpenAI fine-tuning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rd.to_msg_dict()[<span class="st">'messages'</span>][<span class="op">-</span><span class="dv">2</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[{'role': 'user',
+  'content': 'How do I move my project between organizations?'},
+ {'role': 'assistant',
+  'content': "Currently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Here's an example of exporting runs:\n\n1. Read the runs from the source organization using the SDK.\n2. Write the runs to the destination organization using the SDK.\n\nBy following this process, you can transfer your runs from one organization to another. However, it may be faster to create a new project within your destination organization and start fresh.\n\nIf you have any further questions or need assistance, please reach out to us at support@langchain.dev."}]</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L109" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rundata.to_json" class="level4">
+<h4 class="anchored" data-anchor-id="rundata.to_json">RunData.to_json</h4>
+<blockquote class="blockquote">
+<pre><code> RunData.to_json ()</code></pre>
+</blockquote>
+<p>The json version of <code>to_msg_dict</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rd.to_json()[:<span class="dv">100</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'{"functions": [], "messages": [{"role": "system", "content": "You are a helpful documentation Q&amp;A as'</code></pre>
+</div>
+</div>
+<p>The properties <code>flat_input</code> and <code>flat_output</code> allow you to view the input to the LLM and the output in a human readable format (markdown):</p>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L114" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rundata.flat_input" class="level4">
+<h4 class="anchored" data-anchor-id="rundata.flat_input">RunData.flat_input</h4>
+<blockquote class="blockquote">
+<pre><code> RunData.flat_input ()</code></pre>
+</blockquote>
+<p>The input to the LLM in markdown.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rd.flat_input[:<span class="dv">400</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>### System
+
+You are a helpful documentation Q&amp;A assistant, trained to answer questions from LangSmith's documentation. LangChain is a framework for building applications using large language models.
+The current time is 2023-09-05 16:49:07.308007.
+
+Relevant documents will be retrieved in the following messages.
+
+### System
+
+
+
+Skip to main content
+
+ **🦜️🛠️ LangSmith Docs**Python DocsJS/TS Docs
+
+Sear</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L119" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rundata.flat_output" class="level4">
+<h4 class="anchored" data-anchor-id="rundata.flat_output">RunData.flat_output</h4>
+<blockquote class="blockquote">
+<pre><code> RunData.flat_output ()</code></pre>
+</blockquote>
+<p>The output of the LLM in markdown.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rd.flat_output)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>### Assistant
+
+Currently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Here's an example of exporting runs:
+
+1. Read the runs from the source organization using the SDK.
+2. Write the runs to the destination organization using the SDK.
+
+By following this process, you can transfer your runs from one organization to another. However, it may be faster to create a new project within your destination organization and start fresh.
+
+If you have any further questions or need assistance, please reach out to us at support@langchain.dev.
+
+</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="transformations" class="level2">
+<h2 class="anchored" data-anchor-id="transformations">Transformations</h2>
+<p><a href="https://parlance-labs.github.io/langfree/transform.html#tsfm_nm_rephrase"><code>tsfm_nm_rephrase</code></a> does the following transformations to runs:</p>
+<ul>
+<li>Substitutes a random name in various parts chat conversation in a consistent way (data augmentation)</li>
+<li>Rephrases the human input (data augmentation)</li>
+</ul>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L166" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="reword_input" class="level3">
+<h3 class="anchored" data-anchor-id="reword_input">reword_input</h3>
+<blockquote class="blockquote">
+<pre><code> reword_input (inputs)</code></pre>
+</blockquote>
+<p>Rephrase the first human input.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tsfm_nm_rephrase(rundata:RunData, name<span class="op">=</span><span class="va">None</span>) <span class="op">-&gt;</span> RunData:</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Substitutes names in functions &amp; outputs and rephrases the language model input."</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name <span class="kw">is</span> <span class="va">None</span>: name<span class="op">=</span>gen_name()                    <span class="co"># generates a random name to be used to substitute a boilerplate name</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Substituting name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> reword_input(rundata.inputs)              <span class="co"># rephrases the input to the language model</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> _sub_name_in_output(rundata.output, name)  <span class="co"># substitutes the template `[Your Name]` with `name` in the output of the language model</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    funcs <span class="op">=</span> _sub_name_in_func(rundata.funcs, name)      <span class="co"># substitutes the template `[Your Name]` with `name` in the a function schema description</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> RunData(inputs<span class="op">=</span>inputs, output<span class="op">=</span>output, funcs<span class="op">=</span>funcs, run_id<span class="op">=</span>rundata.run_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the below example, <code>[Your name]</code> is being substituted with an actual name:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>_rundata <span class="op">=</span> RunData.from_run_id(_run_id)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>_orig <span class="op">=</span> _rundata.to_msg_dict()</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>_tsfm <span class="op">=</span> tsfm_nm_rephrase(_rundata).to_msg_dict()</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Your Name'</span> <span class="kw">not</span> <span class="kw">in</span> _tsfm[<span class="st">'messages'</span>][<span class="op">-</span><span class="dv">1</span>]  <span class="co"># verify that `[Your Name]` is not present</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> _orig[<span class="st">'messages'</span>][<span class="dv">1</span>][<span class="st">'content'</span>] <span class="op">!=</span> _tsfm[<span class="st">'messages'</span>][<span class="dv">1</span>][<span class="st">'content'</span>]  <span class="co"># make sure the message is different afer substitution</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Substituting name: Zara Thompson
+rephrased input as: Conduct email marketing for 2430 Victory Park Lane, Dallas TX.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="preparing-.jsonl-files" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-.jsonl-files">Preparing <code>.jsonl</code> files</h2>
+<p><a href="https://platform.openai.com/docs/guides/fine-tuning">OpenAI fine-tuning</a> takes <code>.jsonl</code> files.</p>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L187" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="write_to_jsonl" class="level3">
+<h3 class="anchored" data-anchor-id="write_to_jsonl">write_to_jsonl</h3>
+<blockquote class="blockquote">
+<pre><code> write_to_jsonl (data_list:List[__main__.RunData], filename:str)</code></pre>
+</blockquote>
+<p>Writes a list of dictionaries to a .jsonl file.</p>
+<p>Parameters: - data_list (list of <a href="https://parlance-labs.github.io/langfree/transform.html#rundata"><code>RunData</code></a>): The data to be written. - filename (str): The name of the output file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>_rids <span class="op">=</span> [<span class="st">'59080971-8786-4849-be88-898d3ffc2b45'</span>, <span class="st">'8cd7deed-9547-4a07-ac01-55e9513ca1cd'</span>]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>_tsfm_runs <span class="op">=</span> [tsfm_nm_rephrase(RunData.from_run_id(rid)) <span class="cf">for</span> rid <span class="kw">in</span> _rids]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>write_to_jsonl(_tsfm_runs, <span class="st">'_data/test_data.jsonl'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Substituting name: Jake Wilson
+rephrased input as: Implement email marketing for 2430 Victory Park Lane, Dallas TX.
+Substituting name: Kimberly Ramirez
+rephrased input as: Arrange a team-building event for the upcoming month.</code></pre>
+</div>
+</div>
+<p>It can save you time to validate jsonl files prior to uploading them.</p>
+<hr>
+<p><a href="https://github.com/parlance-labs/langfree/blob/main/langfree/transform.py#L201" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="validate_jsonl" class="level3">
+<h3 class="anchored" data-anchor-id="validate_jsonl">validate_jsonl</h3>
+<blockquote class="blockquote">
+<pre><code> validate_jsonl (fname)</code></pre>
+</blockquote>
+<p>Code is modified from https://cookbook.openai.com/examples/chat_finetuning_data_prep, but updated for function calling.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>validate_jsonl(<span class="st">'_data/test_data.jsonl'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Num examples: 2
+No errors found</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
