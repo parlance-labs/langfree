@@ -70,7 +70,7 @@ def gen_name():
         if len(nm) <= 18:
             return nm
 
-# %% ../nbs/02_transform.ipynb 10
+# %% ../nbs/02_transform.ipynb 12
 def fetch_run_componets(run_id:str):
     "Return the `inputs`, `output` and `funcs` for a run of type `ChatOpenAI`."
     client = langsmith.Client()
@@ -86,7 +86,7 @@ def fetch_run_componets(run_id:str):
     funcs = params.get("functions", [])
     return inputs, output, funcs
 
-# %% ../nbs/02_transform.ipynb 14
+# %% ../nbs/02_transform.ipynb 15
 class RunData(BaseModel):
     "Key components of a run from LangSmith"
     inputs:List[dict]
@@ -145,7 +145,7 @@ class RunData(BaseModel):
             md_str += "\n"
         return md_str
 
-# %% ../nbs/02_transform.ipynb 27
+# %% ../nbs/02_transform.ipynb 28
 def _sub_name_in_func(funcs, name):
     "Substitute 'Unit Test' for `name` in the `email-campaign-creator` function"
     emailfunc = L(funcs).filter(lambda x: x['name'] == 'email-campaign-creator')
@@ -156,13 +156,13 @@ def _sub_name_in_func(funcs, name):
         func['parameters']['properties']['body']['description'] = new_desc
     return funcs
 
-# %% ../nbs/02_transform.ipynb 29
+# %% ../nbs/02_transform.ipynb 30
 def _sub_name_in_output(output, name):
     "Subtitute `[Your Name]` with `name` in the output."
     output['content'] = output['content'].replace('[Your Name]', name)
     return output
 
-# %% ../nbs/02_transform.ipynb 31
+# %% ../nbs/02_transform.ipynb 32
 def reword_input(inputs):
     "Rephrase the first human input."
     copy_inputs = copy.deepcopy(inputs)
@@ -173,7 +173,7 @@ def reword_input(inputs):
             break
     return copy_inputs
 
-# %% ../nbs/02_transform.ipynb 33
+# %% ../nbs/02_transform.ipynb 34
 def tsfm_nm_rephrase(rundata:RunData, name=None) -> RunData:
     "Substitutes names in functions & outputs and rephrases the language model input."
     if name is None: name=gen_name()                    # generates a random name to be used to substitute a boilerplate name
@@ -183,7 +183,7 @@ def tsfm_nm_rephrase(rundata:RunData, name=None) -> RunData:
     funcs = _sub_name_in_func(rundata.funcs, name)      # substitutes the template `[Your Name]` with `name` in the a function schema description
     return RunData(inputs=inputs, output=output, funcs=funcs, run_id=rundata.run_id)
 
-# %% ../nbs/02_transform.ipynb 38
+# %% ../nbs/02_transform.ipynb 39
 def write_to_jsonl(data_list:List[RunData], filename:str):
     """
     Writes a list of dictionaries to a .jsonl file.
@@ -197,7 +197,7 @@ def write_to_jsonl(data_list:List[RunData], filename:str):
         for entry in data_list:
             f.write(f"{entry.to_json()}\n")
 
-# %% ../nbs/02_transform.ipynb 41
+# %% ../nbs/02_transform.ipynb 42
 def validate_jsonl(fname):
     "Code is modified from https://cookbook.openai.com/examples/chat_finetuning_data_prep, but updated for function calling."
     # Load the dataset

@@ -34,8 +34,8 @@ def render_input_chat(run:RunData, markdown=True):
             try: content = '```json\n' + pformat(json.loads(content)) + '\n```'
             except: pass
         cards.append(
-            x.ui.card(
-                x.ui.card_header(ui.div({"style": "display: flex; justify-content: space-between;"},
+            ui.card(
+                ui.card_header(ui.div({"style": "display: flex; justify-content: space-between;"},
                                     ui.span(
                                         {"style": "font-weight: bold;"}, 
                                         _get_role(m),
@@ -60,8 +60,8 @@ def render_funcs(run:RunData, markdown=True):
             desc = m.get('description', '')
             content = json.dumps(m.get('parameters', ''), indent=4)
             cards.append(
-                x.ui.card(
-                    x.ui.card_header(ui.div({"style": "display: flex; justify-content: space-between;"},
+                ui.card(
+                    ui.card_header(ui.div({"style": "display: flex; justify-content: space-between;"},
                                         ui.span(
                                             {"style": "font-weight: bold;"}, 
                                             nm,

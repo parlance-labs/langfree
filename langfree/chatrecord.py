@@ -43,7 +43,7 @@ def get_child_chat_run(run):
     else: 
         return run, crun
 
-# %% ../nbs/03_chatrecord.ipynb 6
+# %% ../nbs/03_chatrecord.ipynb 7
 class ChatRecord(BaseModel):
     "A parsed run from LangSmith, focused on the `ChatOpenAI` run type."
     child_run_id:str
@@ -106,7 +106,7 @@ class ChatRecord(BaseModel):
                        function_defs=get_functions(crun),
                        **params)
 
-# %% ../nbs/03_chatrecord.ipynb 15
+# %% ../nbs/03_chatrecord.ipynb 16
 class ChatRecordSet(BaseModel):
     "A List of `ChatRecord`."
     records: List[ChatRecord]
