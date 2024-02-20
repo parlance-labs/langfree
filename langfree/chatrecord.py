@@ -29,7 +29,8 @@ class NoChatOpenAI(Exception):
 def get_child_chat_run(run):
     "Get the last child `ChatOpenAI` run."
     client = Client()
-    if run.execution_order != 1: # this is a child run, get the parent
+    if run.parent_run_id is not None:
+    # if run.execution_order != 1: # this is a child run, get the parent
         run = client.read_run(run.parent_run_id)
             
     _cruns = client.read_run(run_id=run.id, load_child_runs=True).child_runs
