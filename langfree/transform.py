@@ -73,6 +73,11 @@ class RunData(BaseModel):
         return json.dumps(self.to_msg_dict())
 
     @property
+    def outputs(self):
+        "Return outputs for langsmith Datasets compatibility."
+        return self.output
+
+    @property
     def flat_input(self):
         "The input to the LLM in markdown."
         return self._flatten_data(self.inputs)
