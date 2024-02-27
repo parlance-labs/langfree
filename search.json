@@ -1,0 +1,184 @@
+[
+  {
+    "objectID": "runs.html",
+    "href": "runs.html",
+    "title": "runs",
+    "section": "",
+    "text": "Langsmith offers a convenient python client for retrieving runs. The docs go into further detail about the various options available. Some useful patterns to know are:\nGetting a list of runs:\nfrom langsmith import Client\nclient = Client()\nproject_runs = client.list_runs(project_name=\"&lt;your_project&gt;\")\nGetting a specific run:\nfrom langsmith import Client\nclient = Client()\nrun = client.client.read_run(\"&lt;run_id&gt;\")\nFurthermore, there are various ways to filter and search runs which are described in the documentation. If these suit your needs, you may not need the utilities in this module. This module offers opinionated wrappers around the Langsmith client that retrieve runs using common patterns we have seen.\n\n\n\nThe following functions help retrieve runs by a very specific kind of tag, as well as recent runs.\n\nassert reformat_date('9/22/2023') == '2023-09-22'\nassert reformat_date('9/2/2023') == '2023-09-02'\n\nThe idea behind get_runs_by_commit is to quickly retrieve runs that are being logged to langsmith in CI, for example if you are running offline tests automatically against your language models. For example, let’s get runs with the tag commit:4f59dcec in LangSmith (this is specific to my project).\nIn LangSmith, the last child is often useful to view the final call to the language model.\n\n_child_runs = get_last_child(take(_runs, 3))\nassert _child_runs[0].child_run_ids is None # the child doesn't have other children\n\nIt is often helpful to get runs in a batch in a date range:\n\n_runs1 = get_recent_runs(start_dt='10/4/2023', end_dt='10/5/2023', limit=10)\nassert len(_runs1) == 10\n\n_runs2 = get_recent_runs(start_dt='10/3/2023', limit=10)\nassert len(_runs2) == 10\n\n_runs3 = get_recent_runs(limit=10)\nassert len(_runs3) == 10\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2023-10-04\"), lte(start_time, \"2023-10-05\"))\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2023-10-03\"), lte(start_time, \"2023-10-06\"))\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2024-02-22\"), lte(start_time, \"2024-02-25\"))\n\n\nBecause I like to tag my LangSmith runs with commit SHA (see get_runs_by_commit), I also want to see the most recent commit SHAs so I know what to query!\n\nget_recent_commit_tags()\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2024-02-22\"), lte(start_time, \"2024-02-25\"))\n| start_dt   | commit   |   count |\n|:-----------|:---------|--------:|\n| 02/24/2024 | ca2232cc |     490 |\n\n\nget_recent_commit_tags can also return a Pandas dataframe:\n\n_df = get_recent_commit_tags(return_df=True)\nassert _df.shape[0] &gt;= 1\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2024-02-22\"), lte(start_time, \"2024-02-25\"))\n\n\n\n\n\nYou may also want to query runs by feedback, however there are many degrees of freedom with how you can implement feedback. Furthermore, there are many ways you can utilize tags. For these cases, we suggest using the langsmith client directly as discussed earlier.\nWe will continue to update this library with additional recipes should we find other common patterns that are generalizable.",
+    "crumbs": [
+      "runs"
+    ]
+  },
+  {
+    "objectID": "runs.html#get-runs",
+    "href": "runs.html#get-runs",
+    "title": "runs",
+    "section": "",
+    "text": "Langsmith offers a convenient python client for retrieving runs. The docs go into further detail about the various options available. Some useful patterns to know are:\nGetting a list of runs:\nfrom langsmith import Client\nclient = Client()\nproject_runs = client.list_runs(project_name=\"&lt;your_project&gt;\")\nGetting a specific run:\nfrom langsmith import Client\nclient = Client()\nrun = client.client.read_run(\"&lt;run_id&gt;\")\nFurthermore, there are various ways to filter and search runs which are described in the documentation. If these suit your needs, you may not need the utilities in this module. This module offers opinionated wrappers around the Langsmith client that retrieve runs using common patterns we have seen.\n\n\n\nThe following functions help retrieve runs by a very specific kind of tag, as well as recent runs.\n\nassert reformat_date('9/22/2023') == '2023-09-22'\nassert reformat_date('9/2/2023') == '2023-09-02'\n\nThe idea behind get_runs_by_commit is to quickly retrieve runs that are being logged to langsmith in CI, for example if you are running offline tests automatically against your language models. For example, let’s get runs with the tag commit:4f59dcec in LangSmith (this is specific to my project).\nIn LangSmith, the last child is often useful to view the final call to the language model.\n\n_child_runs = get_last_child(take(_runs, 3))\nassert _child_runs[0].child_run_ids is None # the child doesn't have other children\n\nIt is often helpful to get runs in a batch in a date range:\n\n_runs1 = get_recent_runs(start_dt='10/4/2023', end_dt='10/5/2023', limit=10)\nassert len(_runs1) == 10\n\n_runs2 = get_recent_runs(start_dt='10/3/2023', limit=10)\nassert len(_runs2) == 10\n\n_runs3 = get_recent_runs(limit=10)\nassert len(_runs3) == 10\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2023-10-04\"), lte(start_time, \"2023-10-05\"))\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2023-10-03\"), lte(start_time, \"2023-10-06\"))\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2024-02-22\"), lte(start_time, \"2024-02-25\"))\n\n\nBecause I like to tag my LangSmith runs with commit SHA (see get_runs_by_commit), I also want to see the most recent commit SHAs so I know what to query!\n\nget_recent_commit_tags()\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2024-02-22\"), lte(start_time, \"2024-02-25\"))\n| start_dt   | commit   |   count |\n|:-----------|:---------|--------:|\n| 02/24/2024 | ca2232cc |     490 |\n\n\nget_recent_commit_tags can also return a Pandas dataframe:\n\n_df = get_recent_commit_tags(return_df=True)\nassert _df.shape[0] &gt;= 1\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"2024-02-22\"), lte(start_time, \"2024-02-25\"))\n\n\n\n\n\nYou may also want to query runs by feedback, however there are many degrees of freedom with how you can implement feedback. Furthermore, there are many ways you can utilize tags. For these cases, we suggest using the langsmith client directly as discussed earlier.\nWe will continue to update this library with additional recipes should we find other common patterns that are generalizable.",
+    "crumbs": [
+      "runs"
+    ]
+  },
+  {
+    "objectID": "runs.html#parse-data",
+    "href": "runs.html#parse-data",
+    "title": "runs",
+    "section": "Parse Data",
+    "text": "Parse Data\n\n_run = client.read_run('8cd7deed-9547-4a07-ac01-55e9513ca1cd')\nget_params(_run)\n\n{'param_model_name': 'gpt-3.5-turbo-0613',\n 'param_n': 1,\n 'param_top_p': 1,\n 'param_temp': 0,\n 'param_presence_penalty': 0,\n 'param_freq_penalty': 0}\n\n\n\n_funcs = get_functions(_run)\nfor f in _funcs:\n    print(f['name'])\n\ncontact-finder\ncontact-creator\nemail-campaign-creator\ntask-creator\ntask-finder\nhuman-chat\ncalculator\nknowledge-base\n\n\n\n_feedback = get_feedback(client.read_run('7aba254d-3812-4050-85a5-ed64af50d2f1'))\nassert _feedback[0]['score'] == 0\nassert _feedback[0]['key'] == 'empty response'\n_feedback\n\n[{'key': 'empty response',\n  'score': 0.0,\n  'value': None,\n  'comment': \"expected '' to have a length above 0 but got 0\",\n  'correction': None}]",
+    "crumbs": [
+      "runs"
+    ]
+  },
+  {
+    "objectID": "runs.html#exporting-runs-to-pandas",
+    "href": "runs.html#exporting-runs-to-pandas",
+    "title": "runs",
+    "section": "Exporting Runs To Pandas",
+    "text": "Exporting Runs To Pandas\nSee the chatrecord module.",
+    "crumbs": [
+      "runs"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "langfree",
+    "section": "",
+    "text": "langfree helps you extract, transform and curate ChatOpenAI runs from traces stored in LangSmith, which can be used for fine-tuning and evaluation.",
+    "crumbs": [
+      "langfree"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "langfree",
+    "section": "Install",
+    "text": "Install\npip install langfree",
+    "crumbs": [
+      "langfree"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "langfree",
+    "section": "How to use",
+    "text": "How to use\n\nGet runs from LangSmith\nThe runs module contains some utilities to quickly get runs. We can get the recent runs from langsmith like so:\n\nfrom langfree.runs import get_recent_runs\nruns = get_recent_runs(last_n_days=3, limit=5)\n\nFetching runs with this filter: and(eq(status, \"success\"), gte(start_time, \"11/03/2023\"), lte(start_time, \"11/07/2023\"))\n\n\n\nprint(f'Fetched {len(list(runs))} runs')\n\nFetched 5 runs\n\n\nThere are other utlities like get_runs_by_commit if you are tagging runs by commit SHA. You can also use the langsmith sdk to get runs.\n\n\nParse The Data\nChatRecordSet parses the LangChain run in the following ways:\n\nfinds the last child run that calls the language model (ChatOpenAI) in the chain where the run resides. You are often interested in the last call to the language model in the chain when curating data for fine tuning.\nextracts the inputs, outputs and function definitions that are sent to the language model.\nextracts other metadata that influences the run, such as the model version and parameters.\n\nfrom langfree.chatrecord import ChatRecordSet\nllm_data = ChatRecordSet.from_runs(runs)\nInspect Data\n\nllm_data[0].child_run.inputs[0]\n\n{'role': 'system',\n 'content': \"You are a helpful documentation Q&A assistant, trained to answer questions from LangSmith's documentation. LangChain is a framework for building applications using large language models.\\nThe current time is 2023-09-05 16:49:07.308007.\\n\\nRelevant documents will be retrieved in the following messages.\"}\n\n\n\nllm_data[0].child_run.output\n\n{'role': 'assistant',\n 'content': \"Currently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Here's an example of exporting runs:\\n\\n1. Read the runs from the source organization using the SDK.\\n2. Write the runs to the destination organization using the SDK.\\n\\nBy following this process, you can transfer your runs from one organization to another. However, it may be faster to create a new project within your destination organization and start fresh.\\n\\nIf you have any further questions or need assistance, please reach out to us at support@langchain.dev.\"}\n\n\nYou can also see a flattened version of the input and the output\n\nprint(llm_data[0].flat_input[:200])\n\n### System\n\nYou are a helpful documentation Q&A assistant, trained to answer questions from LangSmith's documentation. LangChain is a framework for building applications using large language models.\nT\n\n\n\nprint(llm_data[0].flat_output[:200])\n\n### Assistant\n\nCurrently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Her\n\n\n\n\nTransform The Data\nPerform data augmentation by rephrasing the first human input. Here is the first human input before data augmentation:\n\nrun = llm_data[0].child_run\n[x for x in run.inputs if x['role'] == 'user']\n\n[{'role': 'user',\n  'content': 'How do I move my project between organizations?'}]\n\n\nUpdate the inputs:\n\nfrom langfree.transform import reword_input\nrun.inputs = reword_input(run.inputs)\n\nrephrased input as: How can I transfer my project from one organization to another?\n\n\nCheck that the inputs are updated correctly:\n\n[x for x in run.inputs if x['role'] == 'user']\n\n[{'role': 'user',\n  'content': 'How can I transfer my project from one organization to another?'}]\n\n\nYou can also call .to_dicts() to convert llm_data to a list of dicts that can be converted to jsonl for fine-tuning OpenAI models.\n\nllm_dicts = llm_data.to_dicts()\nprint(llm_dicts[0].keys(), len(llm_dicts))\n\ndict_keys(['functions', 'messages']) 5\n\n\nYou can use write_to_jsonl and validate_jsonl to help write this data to .jsonl and validate it.",
+    "crumbs": [
+      "langfree"
+    ]
+  },
+  {
+    "objectID": "index.html#build-customize-tools-for-curating-llm-data",
+    "href": "index.html#build-customize-tools-for-curating-llm-data",
+    "title": "langfree",
+    "section": "Build & Customize Tools For Curating LLM Data",
+    "text": "Build & Customize Tools For Curating LLM Data\nThe previous steps showed you how to collect and transform your data from LangChain runs. Next, you can feed this data into a tool to help you curate this data for fine tuning.\nTo learn how to run and customize this kind of tool, read the tutorial. langfree can help you quickly build something that looks like this:",
+    "crumbs": [
+      "langfree"
+    ]
+  },
+  {
+    "objectID": "index.html#faq",
+    "href": "index.html#faq",
+    "title": "langfree",
+    "section": "FAQ",
+    "text": "FAQ\n\nWe don’t use LangChain. Can we still use something from this library? No, not directly. However, we recommend looking at how the Shiny for Python App works so you can adapt it towards your own use cases.\nWhy did you use Shiny For Python? Python has many great front-end libraries like Gradio, Streamlit, Panel and others. However, we liked Shiny For Python the best, because of its reactive model, modularity, strong integration with Quarto, and WASM support. You can read more about it here.\nDoes this only work with runs from LangChain/LangSmith? Yes, langfree has only been tested with LangChain runs that have been logged toLangSmith, however we suspect that you could log your traces elsewhere and pull them in a similar manner.\nDoes this only work with ChatOpenAI runs? A: Yes, langfree is opinionated and only works with runs that use chat models from OpenAI (which use ChatOpenAI in LangChain). We didn’t want to over-generalize this tool too quickly and started with the most popular combination of things.\nDo you offer support?: These tools are free and licensed under Apache 2.0. If you want support or customization, feel free to reach out to us.",
+    "crumbs": [
+      "langfree"
+    ]
+  },
+  {
+    "objectID": "index.html#contributing",
+    "href": "index.html#contributing",
+    "title": "langfree",
+    "section": "Contributing",
+    "text": "Contributing\nThis library was created with nbdev. See Contributing.md for further guidelines.",
+    "crumbs": [
+      "langfree"
+    ]
+  },
+  {
+    "objectID": "tutorials/shiny.html",
+    "href": "tutorials/shiny.html",
+    "title": "App To Review LLM Data",
+    "section": "",
+    "text": "How to use langfree to build an app you can use to review LLM data.\nThe motivation for building your own review app is discussed on the homepage. This tutorial walks you through how you can build a minimal app using Shiny For Python.",
+    "crumbs": [
+      "tutorials",
+      "App To Review LLM Data"
+    ]
+  },
+  {
+    "objectID": "tutorials/shiny.html#footnotes",
+    "href": "tutorials/shiny.html#footnotes",
+    "title": "App To Review LLM Data",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWe recommend using a real database for production applications, but this allows you to get an understanding of how the system works.↩︎",
+    "crumbs": [
+      "tutorials",
+      "App To Review LLM Data"
+    ]
+  },
+  {
+    "objectID": "chatrecord.html",
+    "href": "chatrecord.html",
+    "title": "chatrecord",
+    "section": "",
+    "text": "from nbdev.showdoc import show_doc\nWhen instantiating ChatRecord with the class methods ChatRecord.from_run or ChatRecord.from_run_id, we automatically query the parent run of the LangChain trace in LangSmith to get metadata like feedback. Additionally, if you instantiate ChatRecord with a root run or a run that is not a ChatOpenAI run type, ChatRecord will attempt to find the last ChatOpenAI in your chain and store the id in ChatRecord.child_run_id. The data for this child run (inputs, outputs, functions) is stored in ChatRecord.child_run and is of type RunData.\nsource",
+    "crumbs": [
+      "chatrecord"
+    ]
+  },
+  {
+    "objectID": "chatrecord.html#chatrecordset-a-list-of-chatrecord",
+    "href": "chatrecord.html#chatrecordset-a-list-of-chatrecord",
+    "title": "chatrecord",
+    "section": "ChatRecordSet, a list of ChatRecord",
+    "text": "ChatRecordSet, a list of ChatRecord\n\nsource\n\nChatRecordSet.from_runs\n\n ChatRecordSet.from_runs (runs:List[langsmith.schemas.Run])\n\nLoad ChatRecordSet from runs.\nWe can create a ChatRecordSet directly from a list of runs:\n\n# from langfree.runs import get_runs_by_commit\n_runs = get_runs_by_commit(commit_id='028e4aa4', limit=10)\nllmdata = ChatRecordSet.from_runs(_runs)\n\nFetching runs with this filter: and(eq(status, \"success\"), has(tags, \"commit:028e4aa4\"))\n\n\nThere is a special shortcut to get runs by a commit tag which uses get_runs_by_commit for you:\n\nsource\n\n\nChatRecordSet.from_commit\n\n ChatRecordSet.from_commit (commit_id:str, limit:int=None)\n\nCreate a ChatRecordSet from a commit id\n\nllmdata2 = ChatRecordSet.from_commit('028e4aa4', limit=10)\nassert llmdata[0].child_run_id == llmdata2[0].child_run_id\n\nFetching runs with this filter: and(eq(status, \"success\"), has(tags, \"commit:028e4aa4\"))\n\n\nFinally, you can also construct a ChatRecordSet from a list of run ids:\n\nsource\n\n\nChatRecordSet.from_run_ids\n\n ChatRecordSet.from_run_ids (runs:List[str])\n\nLoad ChatRecordSet from run ids.\n\n_run_ids = ['ba3c0a47-0803-4b0f-8a2f-380722edc2bf',\n '842fe1b4-c650-4bfa-bcf9-bf5c30f8204c',\n '5c06bbf3-ef14-47a1-a3a4-221f65d4a407',\n '327039ab-a0a5-488b-875f-21e0d30ee2cd']\n\nllmdata3 = ChatRecordSet.from_run_ids(_run_ids)\nassert len(llmdata3) == len(_run_ids)\nassert llmdata[0].child_run_id == _run_ids[0]\n\n\n\nConvert ChatRecordSet to a Pandas Dataframe\nYou can do this with to_pandas()\n\n_df = llmdata.to_pandas()\n_df.head(1)\n\n\n\n\n\n\n\n\n\nchild_run_id\nchild_run\nchild_url\nparent_run_id\nparent_url\ntotal_tokens\nprompt_tokens\ncompletion_tokens\nfeedback\nfeedback_keys\ntags\nstart_dt\nfunction_defs\nparam_model_name\nparam_n\nparam_top_p\nparam_temp\nparam_presence_penalty\nparam_freq_penalty\n\n\n\n\n0\nba3c0a47-0803-4b0f-8a2f-380722edc2bf\ninputs=[{'role': 'system', 'content': 'You are...\nhttps://smith.langchain.com/o/9d90c3d2-ca7e-4c...\n7074af93-1821-4325-9d45-0f2e81eca0fe\nhttps://smith.langchain.com/o/9d90c3d2-ca7e-4c...\n0\n0\n0\n[]\n[]\n[commit:028e4aa4, branch:testing, test, room:6...\n09/05/2023\n[{'name': 'contact-finder', 'parameters': {'ty...\ngpt-3.5-turbo-0613\n1\n1\n0\n0\n0\n\n\n\n\n\n\n\n\n\n\nSave Data\n\nllmdata.save('_data/llm_data.pkl')\n\nPath('_data/llm_data.pkl')\n\n\n\n\nLoad Data\n\n_loaded = ChatRecordSet.load('_data/llm_data.pkl')\nassert llmdata.records[0].child_run_id == _loaded.records[0].child_run_id",
+    "crumbs": [
+      "chatrecord"
+    ]
+  },
+  {
+    "objectID": "shiny.html",
+    "href": "shiny.html",
+    "title": "shiny",
+    "section": "",
+    "text": "Shiny for Python is a front end framework that allows you to quickly build simple applications. It’s perfect for customizing your own data annotation and review app for LLMs1. This module contains opinionated components that display ChatOpenAI run information in Shiny Apps.\nsource",
+    "crumbs": [
+      "shiny"
+    ]
+  },
+  {
+    "objectID": "shiny.html#footnotes",
+    "href": "shiny.html#footnotes",
+    "title": "shiny",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWe tried other similar frameworks like Gradio, Streamlit, and Panel, but found Shiny to fit our needs the best.↩︎",
+    "crumbs": [
+      "shiny"
+    ]
+  },
+  {
+    "objectID": "transform.html",
+    "href": "transform.html",
+    "title": "transform",
+    "section": "",
+    "text": "from nbdev.showdoc import show_doc\n@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))\ndef chat(**kwargs):\n    \"A wrapper around `openai.ChatCompletion` that has automatic retries.\" \n    client.api_key = os.environ['OPENAI_API_KEY']\n    return client.chat.completions.create(**kwargs)\n_tst_run_id = '1863d76e-1462-489a-a8a7-e0404239fe47'\n\nwith _temp_env_var(tmp_env):  #context manager that has specific environment vars for testing                    \n    _inp, _out, _funcs = fetch_run_componets(_tst_run_id)\n\nprint(f\"\"\"first input:\n{_inp[0]} \n\noutput:\n{_out} \n\nfunctions:\n{_funcs}\"\"\")\n\nfirst input:\n{'role': 'system', 'content': \"You are a helpful documentation Q&A assistant, trained to answer questions from LangSmith's documentation. LangChain is a framework for building applications using large language models.\\nThe current time is 2023-09-05 16:49:07.308007.\\n\\nRelevant documents will be retrieved in the following messages.\"} \n\noutput:\n{'role': 'assistant', 'content': \"Currently, LangSmith does not support project migration between organizations. However, you can manually imitate this process by reading and writing runs and datasets using the SDK. Here's an example of exporting runs:\\n\\n1. Read the runs from the source organization using the SDK.\\n2. Write the runs to the destination organization using the SDK.\\n\\nBy following this process, you can transfer your runs from one organization to another. However, it may be faster to create a new project within your destination organization and start fresh.\\n\\nIf you have any further questions or need assistance, please reach out to us at support@langchain.dev.\"} \n\nfunctions:\n[]\nclass RunData(BaseModel):\n    \"Key components of a run from LangSmith\"\n    inputs:List[dict]\n    output:dict\n    funcs:List[dict] \n    run_id:str\n\n    @classmethod\n    def from_run_id(cls, run_id:str):\n        \"Create a `RunData` object from a run id.\"\n        inputs, output, funcs = fetch_run_componets(run_id)\n        return cls(inputs=inputs, output=output, funcs=funcs, run_id=run_id)\n\n    def to_msg_dict(self):\n        \"Transform the instance into a dict in the format that can be used for OpenAI fine-tuning.\"\n        msgs = self.inputs + [self.output]\n        return {\"functions\": self.funcs,\n                \"messages\": msgs}\n\n    def to_json(self):\n        \"The json version of `to_msg_dict`.\"\n        return json.dumps(self.to_msg_dict())\n\n    @property\n    def outputs(self):\n        \"Return outputs for langsmith Datasets compatibility.\"\n        return self.output\n\n    @property\n    def flat_input(self):\n        \"The input to the LLM in markdown.\"\n        return self._flatten_data(self.inputs)\n\n    @property\n    def flat_output(self):\n        \"The output of the LLM in markdown.\"\n        return self._flatten_data([self.output])\n\n    @classmethod    \n    def _flatten_data(cls, data):\n        \"Produce a flattened view of the data as human readable Markdown.\"\n        md_str = \"\"\n        for item in data:\n            # Heading\n            role = item['role']\n            if role == 'assistant' and 'function_call' in item:\n                role += ' - function call'\n            if role == 'function':\n                role += ' - results'\n            \n            md_str += f\"### {role.title()}\\n\\n\"\n\n            content = item.get('content', '')\n            if content: md_str += content + \"\\n\"\n                \n            elif 'function_call' in item:\n                func_name = item['function_call']['name']\n                args = json.loads(item['function_call']['arguments'])\n                formatted_args = ', '.join([f\"{k}={v}\" for k, v in args.items()])\n                md_str += f\"{func_name}({formatted_args})\\n\"\n            md_str += \"\\n\"\n        return md_str\nsource",
+    "crumbs": [
+      "transform"
+    ]
+  },
+  {
+    "objectID": "transform.html#preparing-.jsonl-files",
+    "href": "transform.html#preparing-.jsonl-files",
+    "title": "transform",
+    "section": "Preparing .jsonl files",
+    "text": "Preparing .jsonl files\nOpenAI fine-tuning takes .jsonl files.\n\n_rids = ['59080971-8786-4849-be88-898d3ffc2b45', '8cd7deed-9547-4a07-ac01-55e9513ca1cd']\n_tsfm_runs = [RunData.from_run_id(rid) for rid in _rids]\nwrite_to_jsonl(_tsfm_runs, '_data/test_data.jsonl');\n\nIt can save you time to validate jsonl files prior to uploading them.\n\nvalidate_jsonl('_data/test_data.jsonl')\n\nNum examples: 2\nNo errors found",
+    "crumbs": [
+      "transform"
+    ]
+  }
+]
