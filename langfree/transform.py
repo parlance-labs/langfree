@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['client', 'chat', 'fetch_run_componets', 'RunData', 'write_to_jsonl', 'validate_jsonl']
 
-# %% ../nbs/02_transform.ipynb 2
+# %% ../nbs/02_transform.ipynb 3
 import os, copy, json
 import openai, langsmith
 from typing import List, Callable
@@ -22,17 +22,17 @@ from tenacity import (
 )  # for exponential backoff
 
 
-# %% ../nbs/02_transform.ipynb 4
+# %% ../nbs/02_transform.ipynb 5
 client = openai.OpenAI()
 
-# %% ../nbs/02_transform.ipynb 5
+# %% ../nbs/02_transform.ipynb 6
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def chat(**kwargs):
     "A wrapper around `openai.ChatCompletion` that has automatic retries." 
     client.api_key = os.environ['OPENAI_API_KEY']
     return client.chat.completions.create(**kwargs)
 
-# %% ../nbs/02_transform.ipynb 8
+# %% ../nbs/02_transform.ipynb 9
 def fetch_run_componets(run_id:str):
     "Return the `inputs`, `output` and `funcs` for a run of type `ChatOpenAI`."
     client = langsmith.Client()
@@ -48,7 +48,7 @@ def fetch_run_componets(run_id:str):
     funcs = params.get("functions", [])
     return inputs, output, funcs
 
-# %% ../nbs/02_transform.ipynb 11
+# %% ../nbs/02_transform.ipynb 12
 class RunData(BaseModel):
     "Key components of a run from LangSmith"
     inputs:List[dict]
@@ -112,7 +112,7 @@ class RunData(BaseModel):
             md_str += "\n"
         return md_str
 
-# %% ../nbs/02_transform.ipynb 24
+# %% ../nbs/02_transform.ipynb 25
 def write_to_jsonl(data_list:List[RunData], filename:str):
     """
     Writes a list of dictionaries to a .jsonl file.
@@ -126,7 +126,7 @@ def write_to_jsonl(data_list:List[RunData], filename:str):
         for entry in data_list:
             f.write(f"{entry.to_json()}\n")
 
-# %% ../nbs/02_transform.ipynb 27
+# %% ../nbs/02_transform.ipynb 28
 def validate_jsonl(fname):
     "Code is modified from https://cookbook.openai.com/examples/chat_finetuning_data_prep, but updated for function calling."
     # Load the dataset
